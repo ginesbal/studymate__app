@@ -1,0 +1,16 @@
+[
+    {
+        "id": "1",
+        "title": "Math Homework",
+        "description": "Complete math exercises",
+        "dueDate": "2024-07-25",
+        "reminderTime": "08:00"
+    },
+    {
+        "id": "2",
+        "title": "Science Project",
+        "description": "Prepare science project presentation",
+        "dueDate": "2024-07-30",
+        "reminderTime": "14:00"
+    }
+]
