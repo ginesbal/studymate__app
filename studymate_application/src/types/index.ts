@@ -14,5 +14,13 @@ export type RootStackParamList = {
 export type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'HomeScreen'>;
 export type TaskDetailRouteProp = RouteProp<RootStackParamList, 'TaskDetailScreen'>;
 export type TaskDetailNavigationProp = StackNavigationProp<RootStackParamList, 'TaskDetailScreen'>;
-
 export type AddTaskNavigationProp = StackNavigationProp<RootStackParamList, 'AddTaskScreen'>;
+
+export type Task = {
+    id: string;
+    title: string;
+    description: string;
+    dueDate: string;
+    reminderTime: string;
+    completed: boolean;
+};
