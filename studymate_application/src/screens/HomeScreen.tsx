@@ -1,18 +1,31 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, SectionList, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import tasksData from '../data/tasks.json';
+import { ActivityIndicator, ScrollView, SectionList, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import { HomeScreenNavigationProp, Task } from '../types';
 import { groupTasksByDate } from '../utils/groupTasksByDate';
 
-const HomeScreen: React.FC = () => {
+const HomeScreen: React.FC<{ name: string }> = ({ name }) => {
     const navigation = useNavigation<HomeScreenNavigationProp>();
     const [tasks, setTasks] = useState<Task[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
-        setTimeout(() => {
-            setTasks(tasksData as Task[]);
-        }, 1000);
+        const fetchTasks = async () => {
+            try {
+                const savedTasks = await AsyncStorage.getItem('tasks');
+                if (savedTasks) {
+                    setTasks(JSON.parse(savedTasks));
+                }
+                setLoading(false);
+            } catch (error) {
+                console.error('Error fetching tasks:', error);
+                setLoading(false);
+            }
+        };
+
+        fetchTasks();
     }, []);
 
     const groupedTasks = groupTasksByDate(tasks);
@@ -20,6 +33,13 @@ const HomeScreen: React.FC = () => {
         title: date,
         data: groupedTasks[date],
     }));
+
+    const getGreeting = () => {
+        const hour = new Date().getHours();
+        if (hour < 12) return `Good morning, ${name} 🌅`;
+        if (hour < 18) return `Good afternoon, ${name} ☀️`;
+        return `Good evening, ${name} 🌆`;
+    };
 
     const renderTaskItem = ({ item }: { item: Task }) => (
         <View style={styles.taskContainer}>
@@ -35,47 +55,42 @@ const HomeScreen: React.FC = () => {
         </View>
     );
 
+    const subjectStyles: { [key: string]: any } = {
+        mathematics: styles.mathematics,
+        geography: styles.geography,
+        biology: styles.biology,
+        physics: styles.physics,
+        chemistry: styles.chemistry,
+    };
+
+    const subjectIcons: { [key: string]: string } = {
+        mathematics: 'calculator',
+        geography: 'globe',
+        biology: 'leaf',
+        physics: 'atom',
+        chemistry: 'flask',
+    };
+
     return (
         <View style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
             <View style={styles.headerContainer}>
-                <Text style={styles.headerTitle}>Good morning, Jocelyn ☁️</Text>
+                <Text style={styles.headerTitle}>{getGreeting()}</Text>
                 <TouchableOpacity style={styles.menuButton}>
                     <Text style={styles.menuButtonText}>⋮</Text>
                 </TouchableOpacity>
             </View>
             <Text style={styles.sectionTitle}>Subjects</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.subjectsContainer}>
-                <View style={[styles.subjectBox, styles.mathematics]}>
-                    <Text style={styles.subjectText}>Mathematics</Text>
-                    <TouchableOpacity style={styles.subjectMenuButton}>
-                        <Text style={styles.subjectMenuButtonText}>⋮</Text>
+                {["Mathematics", "Geography", "Biology", "Physics", "Chemistry"].map((subject, index) => (
+                    <TouchableOpacity key={index} style={[styles.subjectBox, subjectStyles[subject.toLowerCase()]]}>
+                        <Icon name={subjectIcons[subject.toLowerCase()]} size={30} color="#FFFFFF" style={styles.subjectIcon} />
+                        <Text style={styles.subjectText}>{subject}</Text>
+                        <TouchableOpacity style={styles.subjectMenuButton}>
+                            <Text style={styles.subjectMenuButtonText}>⋮</Text>
+                        </TouchableOpacity>
                     </TouchableOpacity>
-                </View>
-                <View style={[styles.subjectBox, styles.geography]}>
-                    <Text style={styles.subjectText}>Geography</Text>
-                    <TouchableOpacity style={styles.subjectMenuButton}>
-                        <Text style={styles.subjectMenuButtonText}>⋮</Text>
-                    </TouchableOpacity>
-                </View>
-                <View style={[styles.subjectBox, styles.biology]}>
-                    <Text style={styles.subjectText}>Biology</Text>
-                    <TouchableOpacity style={styles.subjectMenuButton}>
-                        <Text style={styles.subjectMenuButtonText}>⋮</Text>
-                    </TouchableOpacity>
-                </View>
-                <View style={[styles.subjectBox, styles.physics]}>
-                    <Text style={styles.subjectText}>Physics</Text>
-                    <TouchableOpacity style={styles.subjectMenuButton}>
-                        <Text style={styles.subjectMenuButtonText}>⋮</Text>
-                    </TouchableOpacity>
-                </View>
-                <View style={[styles.subjectBox, styles.chemistry]}>
-                    <Text style={styles.subjectText}>Chemistry</Text>
-                    <TouchableOpacity style={styles.subjectMenuButton}>
-                        <Text style={styles.subjectMenuButtonText}>⋮</Text>
-                    </TouchableOpacity>
-                </View>
+                ))}
             </ScrollView>
             <View style={styles.scheduleHeader}>
                 <Text style={styles.sectionTitle}>Your Schedule</Text>
@@ -86,12 +101,16 @@ const HomeScreen: React.FC = () => {
                     <Text style={styles.viewTasksButtonText}>View Tasks</Text>
                 </TouchableOpacity>
             </View>
-            <SectionList
-                sections={sections}
-                renderItem={renderTaskItem}
-                keyExtractor={(item) => item.id}
-                contentContainerStyle={styles.listContent}
-            />
+            {loading ? (
+                <ActivityIndicator size="large" color="#3A86FF" style={styles.loadingIndicator} />
+            ) : (
+                <SectionList
+                    sections={sections}
+                    renderItem={renderTaskItem}
+                    keyExtractor={(item) => item.id}
+                    contentContainerStyle={styles.listContent}
+                />
+            )}
             <TouchableOpacity
                 style={styles.fab}
                 onPress={() => navigation.navigate({ name: 'AddTaskScreen', params: {} })}
@@ -147,11 +166,20 @@ const styles = StyleSheet.create({
         width: 150,
         height: 80,
         position: 'relative',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        elevation: 5,
     },
     subjectText: {
         fontSize: 16,
         fontWeight: 'bold',
         color: '#FFFFFF',
+        marginTop: 5,
+    },
+    subjectIcon: {
+        marginBottom: 5,
     },
     subjectMenuButton: {
         position: 'absolute',
@@ -253,6 +281,9 @@ const styles = StyleSheet.create({
     fabIcon: {
         fontSize: 30,
         color: '#FFFFFF',
+    },
+    loadingIndicator: {
+        marginTop: 20,
     },
 });
 

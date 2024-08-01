@@ -1,15 +1,12 @@
 import { Task } from '../types';
 
-export const groupTasksByDate = (tasks: Task[]) => {
-    const groupedTasks: { [date: string]: Task[] } = {};
-
-    tasks.forEach((task) => {
+export const groupTasksByDate = (tasks: Task[]): { [key: string]: Task[] } => {
+    return tasks.reduce((acc, task) => {
         const date = task.dueDate;
-        if (!groupedTasks[date]) {
-            groupedTasks[date] = [];
+        if (!acc[date]) {
+            acc[date] = [];
         }
-        groupedTasks[date].push(task);
-    });
-
-    return groupedTasks;
+        acc[date].push(task);
+        return acc;
+    }, {} as { [key: string]: Task[] });
 };
