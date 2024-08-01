@@ -1,8 +1,7 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, SectionList, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { HomeScreenNavigationProp, Task } from '../types';
 import { groupTasksByDate } from '../utils/groupTasksByDate';
 
@@ -27,6 +26,10 @@ const HomeScreen: React.FC<{ name: string }> = ({ name }) => {
 
         fetchTasks();
     }, []);
+
+    const addNewTask = (newTask: Task) => {
+        setTasks((prevTasks) => [...prevTasks, newTask]);
+    };
 
     const groupedTasks = groupTasksByDate(tasks);
     const sections = Object.keys(groupedTasks).map(date => ({
@@ -63,14 +66,6 @@ const HomeScreen: React.FC<{ name: string }> = ({ name }) => {
         chemistry: styles.chemistry,
     };
 
-    const subjectIcons: { [key: string]: string } = {
-        mathematics: 'calculator',
-        geography: 'globe',
-        biology: 'leaf',
-        physics: 'atom',
-        chemistry: 'flask',
-    };
-
     return (
         <View style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
@@ -84,7 +79,6 @@ const HomeScreen: React.FC<{ name: string }> = ({ name }) => {
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.subjectsContainer}>
                 {["Mathematics", "Geography", "Biology", "Physics", "Chemistry"].map((subject, index) => (
                     <TouchableOpacity key={index} style={[styles.subjectBox, subjectStyles[subject.toLowerCase()]]}>
-                        <Icon name={subjectIcons[subject.toLowerCase()]} size={30} color="#FFFFFF" style={styles.subjectIcon} />
                         <Text style={styles.subjectText}>{subject}</Text>
                         <TouchableOpacity style={styles.subjectMenuButton}>
                             <Text style={styles.subjectMenuButtonText}>⋮</Text>
@@ -113,7 +107,7 @@ const HomeScreen: React.FC<{ name: string }> = ({ name }) => {
             )}
             <TouchableOpacity
                 style={styles.fab}
-                onPress={() => navigation.navigate({ name: 'AddTaskScreen', params: {} })}
+                onPress={() => navigation.navigate('AddTaskScreen', { onAddTask: addNewTask })}
             >
                 <Text style={styles.fabIcon}>+</Text>
             </TouchableOpacity>
@@ -176,10 +170,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         color: '#FFFFFF',
-        marginTop: 5,
-    },
-    subjectIcon: {
-        marginBottom: 5,
     },
     subjectMenuButton: {
         position: 'absolute',

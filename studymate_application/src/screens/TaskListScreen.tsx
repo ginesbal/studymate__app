@@ -1,31 +1,36 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useContext, useState } from 'react';
 import {
     View,
     Text,
-    ScrollView,
+    SectionList,
     ActivityIndicator,
     StyleSheet,
     TouchableOpacity,
+    StatusBar,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import { TaskDetailNavigationProp } from '../types';
+import { Task, RootStackParamList } from '../types';
 import tasksData from '../data/tasks.json';
-import Button from '../components/ui/Button'; // Assuming you have a custom Button component
+import Button from '../components/ui/Button';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { groupTasksByDate } from '../utils/groupTasksByDate';
+import { TasksContext } from '../context/TasksContext';
 
-type Task = {
-    id: string;
-    title: string;
-    description: string;
-    dueDate: string;
-    reminderTime: string;
-    completed: boolean;
+type Props = {
+    initialTasks?: Task[];
 };
 
-const TaskListScreen: React.FC = () => {
-    const navigation = useNavigation<TaskDetailNavigationProp>();
-    const [tasks, setTasks] = useState<Task[]>([]);
+const TaskListScreen: React.FC<Props> = ({ initialTasks = tasksData }) => {
+    const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'TaskListScreen'>>();
+    const context = useContext(TasksContext);
+
+    if (!context) {
+        throw new Error("TasksContext is undefined, make sure you are using the TasksProvider");
+    }
+
+    const { tasks, addNewTask, setTasks } = context;
     const [loading, setLoading] = useState(true);
     const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
@@ -37,8 +42,8 @@ const TaskListScreen: React.FC = () => {
                 if (savedTasks) {
                     setTasks(JSON.parse(savedTasks));
                 } else {
-                    await AsyncStorage.setItem('tasks', JSON.stringify(tasksData));
-                    setTasks(tasksData);
+                    await AsyncStorage.setItem('tasks', JSON.stringify(initialTasks));
+                    setTasks(initialTasks);
                 }
                 setLoading(false);
             } catch (error) {
@@ -48,18 +53,7 @@ const TaskListScreen: React.FC = () => {
         };
 
         fetchTasks();
-    }, []);
-
-    const groupTasksByDate = (tasks: Task[]) => {
-        return tasks.reduce((acc, task) => {
-            const date = task.dueDate;
-            if (!acc[date]) {
-                acc[date] = [];
-            }
-            acc[date].push(task);
-            return acc;
-        }, {} as { [key: string]: Task[] });
-    };
+    }, [initialTasks, setTasks]);
 
     const handleConfirmDate = (date: Date) => {
         setSelectedDate(date.toISOString().split('T')[0]);
@@ -67,36 +61,40 @@ const TaskListScreen: React.FC = () => {
     };
 
     const groupedTasks = groupTasksByDate(tasks);
+    const sections = Object.keys(groupedTasks).map(date => ({
+        title: date,
+        data: groupedTasks[date],
+    }));
+
+    const renderTaskItem = ({ item }: { item: Task }) => (
+        <View style={styles.taskContainer}>
+            <View style={styles.taskContent}>
+                <View style={styles.dateCircle}>
+                    <Text style={styles.dateText}>{new Date(item.dueDate).getDate()}</Text>
+                </View>
+                <View>
+                    <Text style={styles.taskTitle} numberOfLines={1} ellipsizeMode="tail">{item.title}</Text>
+                    <Text style={styles.taskSubtitle}>{item.description}</Text>
+                </View>
+            </View>
+        </View>
+    );
 
     if (loading) {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#2ea789" />
+                <ActivityIndicator size="large" color="#3A86FF" />
             </View>
         );
     }
 
-    const getDayOfWeek = (dateString: string) => {
-        const date = new Date(dateString);
-        const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-        return days[date.getUTCDay()];
-    };
-
-    const getFormattedDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return `${date.toLocaleDateString('en-US', { month: 'short' })} ${date.getFullYear()}`;
-    };
-
     return (
         <View style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.dateText}>{new Date(selectedDate).getDate()}</Text>
-                <View style={styles.dateInfo}>
-                    <Text style={styles.dayText}>{getDayOfWeek(selectedDate)}</Text>
-                    <Text style={styles.monthText}>{getFormattedDate(selectedDate)}</Text>
-                </View>
+            <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
+            <View style={styles.headerContainer}>
+                <Text style={styles.headerTitle}>Your Tasks</Text>
                 <TouchableOpacity onPress={() => setDatePickerVisibility(true)} style={styles.todayButton}>
-                    <Text style={styles.todayText}>Today</Text>
+                    <Text style={styles.todayText}>Select Date</Text>
                 </TouchableOpacity>
             </View>
             <View style={styles.dateRow}>
@@ -118,62 +116,59 @@ const TaskListScreen: React.FC = () => {
                 onConfirm={handleConfirmDate}
                 onCancel={() => setDatePickerVisibility(false)}
             />
-            <ScrollView contentContainerStyle={styles.content}>
-                {groupedTasks[selectedDate] ? (
-                    groupedTasks[selectedDate].map(task => (
-                        <View key={task.id} style={styles.taskContainer}>
-                            <Text style={styles.taskTitle}>{task.title}</Text>
-                            <Text style={styles.taskDescription}>{task.description}</Text>
-                        </View>
-                    ))
-                ) : (
+            <SectionList
+                sections={sections}
+                renderItem={renderTaskItem}
+                keyExtractor={(item) => item.id}
+                ListHeaderComponent={() => (
+                    <View style={styles.scheduleHeader}>
+                        <Text style={styles.sectionTitle}>Your Schedule</Text>
+                    </View>
+                )}
+                contentContainerStyle={styles.listContent}
+                ListEmptyComponent={() => (
                     <Text style={styles.emptyMessage}>
                         No tasks for this date. Tap 'Add New Task' to get started.
                     </Text>
                 )}
-                <Button
-                    title="Add New Task"
-                    onPress={() => navigation.navigate('AddTaskScreen', { id: undefined })}
-                    style={styles.addButton}
-                    textStyle={styles.addButtonText}
-                />
-            </ScrollView>
+            />
+            <Button
+                title="Add New Task"
+                onPress={() => navigation.navigate('AddTaskScreen', { onAddTask: addNewTask })}
+                style={styles.addButton}
+                textStyle={styles.addButtonText}
+            />
         </View>
     );
+};
+
+const getDayOfWeek = (dateString: string) => {
+    const date = new Date(dateString);
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    return days[date.getUTCDay()];
+};
+
+const getFormattedDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return `${date.toLocaleDateString('en-US', { month: 'short' })} ${date.getFullYear()}`;
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#faf9f9',
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        backgroundColor: '#F8F8F8',
         padding: 20,
-        backgroundColor: '#ffffff',
-        borderRadius: 32,
-        marginHorizontal: 20,
-        marginTop: 20,
     },
-    dateText: {
-        fontSize: 50,
-        color: '#202525',
-        fontFamily: 'Poppins-Bold',
-        marginRight: 20,
+    headerContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
     },
-    dateInfo: {
-        flex: 1,
-    },
-    dayText: {
-        fontSize: 18,
-        color: '#444472',
-        fontFamily: 'Poppins-SemiBold',
-    },
-    monthText: {
-        fontSize: 18,
-        color: '#444472',
-        fontFamily: 'Poppins-SemiBold',
+    headerTitle: {
+        fontSize: 26,
+        fontWeight: 'bold',
+        color: '#1E1E2E',
     },
     todayButton: {
         backgroundColor: '#4dc591',
@@ -212,12 +207,23 @@ const styles = StyleSheet.create({
         paddingVertical: 4,
         paddingHorizontal: 8,
     },
-    content: {
+    scheduleHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 10,
         paddingHorizontal: 20,
-        paddingVertical: 10,
+    },
+    sectionTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#1E1E2E',
+    },
+    listContent: {
+        paddingBottom: 20,
     },
     taskContainer: {
-        backgroundColor: '#ffffff',
+        backgroundColor: '#FFFFFF',
         borderRadius: 16,
         padding: 16,
         marginBottom: 10,
@@ -227,15 +233,32 @@ const styles = StyleSheet.create({
         shadowRadius: 3,
         elevation: 5,
     },
+    taskContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    dateCircle: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: '#3A86FF',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 10,
+    },
+    dateText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
     taskTitle: {
         fontSize: 16,
+        fontWeight: 'bold',
         color: '#202525',
-        fontFamily: 'Poppins-SemiBold',
     },
-    taskDescription: {
+    taskSubtitle: {
         fontSize: 14,
         color: '#88889d',
-        fontFamily: 'Poppins-Regular',
     },
     loadingContainer: {
         flex: 1,
