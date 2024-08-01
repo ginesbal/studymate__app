@@ -1,10 +1,8 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
-import { Image, StyleSheet, Text, View, SectionList, StatusBar } from 'react-native';
-import Button from '../components/ui/Button';
-import TaskItem from '../components/ui/TaskItem';
-import { HomeScreenNavigationProp, Task } from '../types';
+import { ScrollView, SectionList, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import tasksData from '../data/tasks.json';
+import { HomeScreenNavigationProp, Task } from '../types';
 import { groupTasksByDate } from '../utils/groupTasksByDate';
 
 const HomeScreen: React.FC = () => {
@@ -12,9 +10,8 @@ const HomeScreen: React.FC = () => {
     const [tasks, setTasks] = useState<Task[]>([]);
 
     useEffect(() => {
-        // Fetch tasks (simulated here with a timeout)
         setTimeout(() => {
-            setTasks(tasksData as Task[]); // Type assertion to ensure tasksData is treated as Task[]
+            setTasks(tasksData as Task[]);
         }, 1000);
     }, []);
 
@@ -30,44 +27,77 @@ const HomeScreen: React.FC = () => {
                 <View style={styles.dateCircle}>
                     <Text style={styles.dateText}>{new Date(item.dueDate).getDate()}</Text>
                 </View>
-                <Text style={styles.taskTitle} numberOfLines={1} ellipsizeMode="tail">{item.title}</Text>
+                <View>
+                    <Text style={styles.taskTitle} numberOfLines={1} ellipsizeMode="tail">{item.title}</Text>
+                    <Text style={styles.taskSubtitle}>{item.description}</Text>
+                </View>
             </View>
         </View>
     );
 
     return (
         <View style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor="#F0EFEB" />
+            <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
             <View style={styles.headerContainer}>
-                <Image source={require('../assets/images/icon.png')} style={styles.icon} />
-                <Text style={styles.title}>Welcome to StudyMate</Text>
+                <Text style={styles.headerTitle}>Good morning, Jocelyn ☁️</Text>
+                <TouchableOpacity style={styles.menuButton}>
+                    <Text style={styles.menuButtonText}>⋮</Text>
+                </TouchableOpacity>
             </View>
-            <Text style={styles.subtitle}>Your personal study planner</Text>
-
-            <View style={styles.buttonContainer}>
-                <Button title="View Tasks" onPress={() => navigation.navigate('TaskListScreen')} />
-                <Button title="Add New Task" onPress={() => navigation.navigate({ name: 'AddTaskScreen', params: {} })} />
-            </View>
-
-            <Text style={styles.quoteText}>"The secret to getting ahead is getting started." - Mark Twain</Text>
-
-            <View style={styles.smallSectionContainer}>
-                <Text style={styles.smallSectionTitle}>Statistics</Text>
-                <View style={styles.statisticsContainer}>
-                    <Text style={styles.statisticsText}>Completed: {tasks.filter(task => task.completed).length}</Text>
-                    <Text style={styles.statisticsText}>Pending: {tasks.filter(task => !task.completed).length}</Text>
+            <Text style={styles.sectionTitle}>Subjects</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.subjectsContainer}>
+                <View style={[styles.subjectBox, styles.mathematics]}>
+                    <Text style={styles.subjectText}>Mathematics</Text>
+                    <TouchableOpacity style={styles.subjectMenuButton}>
+                        <Text style={styles.subjectMenuButtonText}>⋮</Text>
+                    </TouchableOpacity>
                 </View>
+                <View style={[styles.subjectBox, styles.geography]}>
+                    <Text style={styles.subjectText}>Geography</Text>
+                    <TouchableOpacity style={styles.subjectMenuButton}>
+                        <Text style={styles.subjectMenuButtonText}>⋮</Text>
+                    </TouchableOpacity>
+                </View>
+                <View style={[styles.subjectBox, styles.biology]}>
+                    <Text style={styles.subjectText}>Biology</Text>
+                    <TouchableOpacity style={styles.subjectMenuButton}>
+                        <Text style={styles.subjectMenuButtonText}>⋮</Text>
+                    </TouchableOpacity>
+                </View>
+                <View style={[styles.subjectBox, styles.physics]}>
+                    <Text style={styles.subjectText}>Physics</Text>
+                    <TouchableOpacity style={styles.subjectMenuButton}>
+                        <Text style={styles.subjectMenuButtonText}>⋮</Text>
+                    </TouchableOpacity>
+                </View>
+                <View style={[styles.subjectBox, styles.chemistry]}>
+                    <Text style={styles.subjectText}>Chemistry</Text>
+                    <TouchableOpacity style={styles.subjectMenuButton}>
+                        <Text style={styles.subjectMenuButtonText}>⋮</Text>
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
+            <View style={styles.scheduleHeader}>
+                <Text style={styles.sectionTitle}>Your Schedule</Text>
+                <TouchableOpacity
+                    style={styles.viewTasksButton}
+                    onPress={() => navigation.navigate('TaskListScreen')}
+                >
+                    <Text style={styles.viewTasksButtonText}>View Tasks</Text>
+                </TouchableOpacity>
             </View>
-
-            <View style={styles.sectionContainer}>
-                <Text style={styles.sectionTitle}>Upcoming Tasks</Text>
-                <SectionList
-                    sections={sections}
-                    renderItem={renderTaskItem}
-                    keyExtractor={(item) => item.id}
-                    contentContainerStyle={styles.listContent}
-                />
-            </View>
+            <SectionList
+                sections={sections}
+                renderItem={renderTaskItem}
+                keyExtractor={(item) => item.id}
+                contentContainerStyle={styles.listContent}
+            />
+            <TouchableOpacity
+                style={styles.fab}
+                onPress={() => navigation.navigate({ name: 'AddTaskScreen', params: {} })}
+            >
+                <Text style={styles.fabIcon}>+</Text>
+            </TouchableOpacity>
         </View>
     );
 }
@@ -75,106 +105,154 @@ const HomeScreen: React.FC = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F0EFEB',
+        backgroundColor: '#F8F8F8',
         padding: 20,
     },
     headerContainer: {
         flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: 20,
     },
-    icon: {
-        width: 50,
-        height: 50,
-        marginRight: 10,
-    },
-    title: {
-        fontSize: 24,
+    headerTitle: {
+        fontSize: 26,
         fontWeight: 'bold',
-        color: '#283618',
+        color: '#1E1E2E',
     },
-    subtitle: {
+    menuButton: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 12,
+        padding: 10,
+        elevation: 5,
+    },
+    menuButtonText: {
         fontSize: 18,
-        color: '#283618',
-        textAlign: 'center',
-        marginBottom: 20,
-    },
-    buttonContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 20,
-    },
-    sectionContainer: {
-        flex: 1,
-        backgroundColor: '#D4D4D4',
-        borderRadius: 12,
-        padding: 15,
-        marginBottom: 10,
-    },
-    smallSectionContainer: {
-        backgroundColor: 'transparent',
-        borderRadius: 12,
-        padding: 15,
-        marginBottom: 10,
+        color: '#1E1E2E',
     },
     sectionTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#283618',
+        color: '#1E1E2E',
         marginBottom: 10,
     },
-    smallSectionTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#283618',
-        marginBottom: 10,
+    subjectsContainer: {
+        marginBottom: 20,
     },
-    dateCircle: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: '#B7B7A4',
+    subjectBox: {
+        borderRadius: 12,
+        padding: 10,
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: 10,
+        width: 150,
+        height: 80,
+        position: 'relative',
     },
-    dateText: {
-        color: '#283618',
+    subjectText: {
         fontSize: 16,
         fontWeight: 'bold',
+        color: '#FFFFFF',
     },
-    statisticsText: {
-        fontSize: 16,
-        color: '#283618',
-        marginBottom: 5,
+    subjectMenuButton: {
+        position: 'absolute',
+        top: 5,
+        right: 5,
     },
-    statisticsContainer: {
+    subjectMenuButtonText: {
+        fontSize: 18,
+        color: '#FFFFFF',
+    },
+    mathematics: {
+        backgroundColor: '#FF6F61',
+    },
+    geography: {
+        backgroundColor: '#6B8E23',
+    },
+    biology: {
+        backgroundColor: '#20B2AA',
+    },
+    physics: {
+        backgroundColor: '#1E90FF',
+    },
+    chemistry: {
+        backgroundColor: '#DA70D6',
+    },
+    scheduleHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 10,
     },
-    quoteText: {
-        fontSize: 16,
-        color: '#283618',
-        fontStyle: 'italic',
-        textAlign: 'center',
-        marginBottom: 20,
+    viewTasksButton: {
+        backgroundColor: '#3A86FF',
+        borderRadius: 12,
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+    },
+    viewTasksButtonText: {
+        color: '#FFFFFF',
+        fontWeight: 'bold',
     },
     listContent: {
         paddingBottom: 20,
     },
     taskContainer: {
-        padding: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ddd',
+        backgroundColor: '#FFFFFF',
+        borderRadius: 12,
+        padding: 15,
+        marginBottom: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        elevation: 5,
     },
     taskContent: {
         flexDirection: 'row',
         alignItems: 'center',
     },
+    dateCircle: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: '#3A86FF',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 10,
+    },
+    dateText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
     taskTitle: {
         fontSize: 16,
-        color: '#283618',
-        flex: 1,
+        fontWeight: 'bold',
+        color: '#1E1E2E',
+    },
+    taskSubtitle: {
+        fontSize: 14,
+        color: '#A0A0A0',
+    },
+    fab: {
+        position: 'absolute',
+        bottom: 30,
+        right: 30,
+        backgroundColor: '#3A86FF',
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        elevation: 5,
+    },
+    fabIcon: {
+        fontSize: 30,
+        color: '#FFFFFF',
     },
 });
 
