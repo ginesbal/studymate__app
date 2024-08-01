@@ -1,7 +1,8 @@
-import React from 'react';
-import { View, Text, Alert, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Alert, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import { TaskDetailRouteProp, TaskDetailNavigationProp } from '../types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { TaskDetailRouteProp, TaskDetailNavigationProp, Task } from '../types';
 import Button from '../components/ui/Button';
 
 const TaskDetailScreen: React.FC = () => {
@@ -9,16 +10,31 @@ const TaskDetailScreen: React.FC = () => {
     const navigation = useNavigation<TaskDetailNavigationProp>();
     const { id } = route.params;
 
-    // Load task details using id (logic to be implemented)
-    const task = {
-        id,
-        title: 'Sample Task Title',
-        description: 'Sample Task Description',
-        dueDate: '2023-12-31',
-        reminderTime: '08:00',
-    };
+    const [task, setTask] = useState<Task | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
 
-    const handleDeleteTask = () => {
+    useEffect(() => {
+        const loadTask = async () => {
+            try {
+                const savedTasks = await AsyncStorage.getItem('tasks');
+                if (savedTasks) {
+                    const tasks: Task[] = JSON.parse(savedTasks);
+                    const foundTask = tasks.find(task => task.id === id);
+                    if (foundTask) {
+                        setTask(foundTask);
+                    }
+                }
+                setLoading(false);
+            } catch (error) {
+                console.error('Error loading task:', error);
+                setLoading(false);
+            }
+        };
+
+        loadTask();
+    }, [id]);
+
+    const handleDeleteTask = async () => {
         Alert.alert(
             "Delete Task",
             "Are you sure you want to delete this task?",
@@ -30,14 +46,43 @@ const TaskDetailScreen: React.FC = () => {
                 {
                     text: "Delete",
                     style: "destructive",
-                    onPress: () => {
-                        // Logic to delete the task
-                        navigation.goBack();
+                    onPress: async () => {
+                        try {
+                            const savedTasks = await AsyncStorage.getItem('tasks');
+                            if (savedTasks) {
+                                const tasks: Task[] = JSON.parse(savedTasks);
+                                const updatedTasks = tasks.filter(task => task.id !== id);
+                                await AsyncStorage.setItem('tasks', JSON.stringify(updatedTasks));
+                                navigation.goBack();
+                            }
+                        } catch (error) {
+                            console.error('Error deleting task:', error);
+                        }
                     }
                 }
             ]
         );
     };
+
+    const handleEditTask = (updatedTask: Task) => {
+        setTask(updatedTask);
+    };
+
+    if (loading) {
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#3A86FF" />
+            </View>
+        );
+    }
+
+    if (!task) {
+        return (
+            <View style={styles.container}>
+                <Text style={styles.errorText}>Task not found</Text>
+            </View>
+        );
+    }
 
     return (
         <View style={styles.container}>
@@ -48,7 +93,10 @@ const TaskDetailScreen: React.FC = () => {
             <TouchableOpacity style={styles.button} onPress={() => { /* Logic to mark as complete */ }}>
                 <Text style={styles.buttonText}>Mark as Complete</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('AddTaskScreen', { id: task.id })}>
+            <TouchableOpacity
+                style={styles.button}
+                onPress={() => navigation.navigate('AddTaskScreen', { id: task.id, onAddTask: handleEditTask })}
+            >
                 <Text style={styles.buttonText}>Edit Task</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteTask}>
@@ -119,6 +167,15 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
         fontSize: 18,
         fontWeight: 'bold',
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    errorText: {
+        fontSize: 18,
+        color: '#1E1E2E',
     },
 });
 

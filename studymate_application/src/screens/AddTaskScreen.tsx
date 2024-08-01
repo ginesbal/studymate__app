@@ -1,11 +1,24 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
-import React, { useState } from 'react';
+import { StackNavigationProp } from '@react-navigation/stack';
+import React, { useContext, useState } from 'react';
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { TasksContext } from '../context/TasksContext';
+import { RootStackParamList, Task } from '../types'; // Ensure this import is correct
+
+type AddTaskScreenNavigationProp = StackNavigationProp<RootStackParamList, 'AddTaskScreen'>;
 
 const AddTaskScreen: React.FC = () => {
-    const navigation = useNavigation();
+    const navigation = useNavigation<AddTaskScreenNavigationProp>();
+    const context = useContext(TasksContext);
+
+    if (!context) {
+        throw new Error("TasksContext is undefined, make sure you are using the TasksProvider");
+    }
+
+    const { addNewTask } = context;
+
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [dueDate, setDueDate] = useState('');
@@ -29,7 +42,7 @@ const AddTaskScreen: React.FC = () => {
             return;
         }
 
-        const newTask = {
+        const newTask: Task = {
             id: Date.now().toString(),
             title,
             description,
@@ -43,6 +56,7 @@ const AddTaskScreen: React.FC = () => {
             const tasks = storedTasks ? JSON.parse(storedTasks) : [];
             tasks.push(newTask);
             await AsyncStorage.setItem('tasks', JSON.stringify(tasks));
+            addNewTask(newTask);
             navigation.goBack();
         } catch (error) {
             console.error('Error saving task:', error);
