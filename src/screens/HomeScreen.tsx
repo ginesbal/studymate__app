@@ -53,11 +53,9 @@ const HomeScreen: React.FC = () => {
         <Text style={styles.title}>Welcome to StudyMate</Text>
       </View>
       <Text style={styles.subtitle}>Your personal study planner</Text>
-
       <Text style={styles.quoteText}>
         "The secret to getting ahead is getting started." - Mark Twain
       </Text>
-
       <View style={styles.smallSectionContainer}>
         <Text style={styles.smallSectionTitle}>Statistics</Text>
         <View style={styles.statisticsContainer}>
@@ -69,7 +67,6 @@ const HomeScreen: React.FC = () => {
           </Text>
         </View>
       </View>
-
       <View style={styles.sectionContainer}>
         <Text style={styles.sectionTitle}>Upcoming Tasks</Text>
         <SectionList
@@ -93,6 +90,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
+    backgroundColor: '#EDEAE0',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   icon: {
     width: 50,
@@ -112,16 +118,26 @@ const styles = StyleSheet.create({
   },
   sectionContainer: {
     flex: 1,
-    backgroundColor: '#D4D4D4',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 15,
     marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   smallSectionContainer: {
-    backgroundColor: 'transparent',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 15,
     marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   sectionTitle: {
     fontSize: 20,
@@ -169,9 +185,12 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   taskContainer: {
-    padding: 10,
+    padding: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    marginBottom: 10,
   },
   taskContent: {
     flexDirection: 'row',

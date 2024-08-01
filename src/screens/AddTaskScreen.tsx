@@ -1,18 +1,19 @@
-import React, {useState} from 'react';
+import React, {useState, useContext, useRef} from 'react';
 import {
-  Button,
   StyleSheet,
   Text,
   View,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   TouchableOpacity,
+  Animated,
 } from 'react-native';
 import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Input from '../components/ui/Input';
 import {AddTaskNavigationProp, RootStackParamList} from '../types';
+import {TaskContext} from '../context/TaskContext'; // Import TaskContext
+import CustomAlertModal from '../components/ui/CustomAlertModal'; // Import CustomAlertModal
 
 type AddTaskRouteProp = RouteProp<RootStackParamList, 'AddTaskScreen'>;
 
@@ -21,6 +22,8 @@ const AddTaskScreen: React.FC = () => {
   const route = useRoute<AddTaskRouteProp>();
   const {id} = route.params || {};
 
+  const {addTask} = useContext(TaskContext)!; // Use TaskContext
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
@@ -28,6 +31,9 @@ const AddTaskScreen: React.FC = () => {
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+
+  const [showAlert, setShowAlert] = useState(false);
+  const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const onChangeDate = (event: any, selectedDate?: Date) => {
     setShowDatePicker(false);
@@ -45,7 +51,7 @@ const AddTaskScreen: React.FC = () => {
 
   const handleSubmit = () => {
     if (!title || !dueDate) {
-      Alert.alert('Validation Error', 'Title and Due Date are required.');
+      setShowAlert(true); // Show custom alert modal
       return;
     }
 
@@ -62,10 +68,23 @@ const AddTaskScreen: React.FC = () => {
         : '', // Format reminderTime as HH:MM
     };
 
-    // Save the task (logic to be implemented)
-    // e.g., saveTask(newTask);
+    addTask(newTask); // Add task to context
 
     navigation.goBack();
+  };
+
+  const handlePressIn = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 0.98,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+    }).start();
   };
 
   return (
@@ -88,14 +107,17 @@ const AddTaskScreen: React.FC = () => {
             placeholder="Due Date (YYYY-MM-DD)"
             value={dueDate ? dueDate.toISOString().slice(0, 10) : ''}
             editable={false}
-            onChangeText={() => {}}
           />
-          <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+          <TouchableOpacity
+            style={styles.pickerButton}
+            onPress={() => setShowDatePicker(true)}
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}>
             <Text style={styles.datePickerText}>Pick Date</Text>
           </TouchableOpacity>
           {showDatePicker && (
             <DateTimePicker
-              value={dueDate || new Date()} // Provide default value if dueDate is undefined
+              value={dueDate || new Date()}
               mode="date"
               display="default"
               onChange={onChangeDate}
@@ -115,14 +137,17 @@ const AddTaskScreen: React.FC = () => {
                 : ''
             }
             editable={false}
-            onChangeText={() => {}}
           />
-          <TouchableOpacity onPress={() => setShowTimePicker(true)}>
+          <TouchableOpacity
+            style={styles.pickerButton}
+            onPress={() => setShowTimePicker(true)}
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}>
             <Text style={styles.datePickerText}>Pick Time</Text>
           </TouchableOpacity>
           {showTimePicker && (
             <DateTimePicker
-              value={reminderTime || new Date()} // Provide default value if reminderTime is undefined
+              value={reminderTime || new Date()}
               mode="time"
               display="default"
               onChange={onChangeTime}
@@ -130,8 +155,19 @@ const AddTaskScreen: React.FC = () => {
           )}
         </View>
 
-        <Button title="Save Task" onPress={handleSubmit} color="#283618" />
+        <Animated.View style={{transform: [{scale: scaleAnim}]}}>
+          <TouchableOpacity style={styles.saveButton} onPress={handleSubmit}>
+            <Text style={styles.saveButtonText}>Save Task</Text>
+          </TouchableOpacity>
+        </Animated.View>
       </View>
+
+      {/* Use CustomAlertModal */}
+      <CustomAlertModal
+        visible={showAlert}
+        onClose={() => setShowAlert(false)}
+        message="Title and Due Date are required."
+      />
     </KeyboardAvoidingView>
   );
 };
@@ -140,26 +176,52 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#F0EFEB',
+    backgroundColor: '#F9F7F0',
   },
   content: {
     flex: 1,
     justifyContent: 'center',
   },
   header: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: '#283618',
+    color: '#4A4A4A',
     textAlign: 'center',
   },
   dateTimeContainer: {
     marginBottom: 20,
   },
   datePickerText: {
-    color: '#283618',
+    color: '#4A4A4A',
     textAlign: 'center',
     marginBottom: 10,
+    fontSize: 16,
+  },
+  pickerButton: {
+    backgroundColor: '#B7B7A4',
+    borderRadius: 8,
+    padding: 10,
+    borderColor: '#A09B9B', // Darker border
+    borderWidth: 1,
+  },
+  saveButton: {
+    backgroundColor: '#283618', // Green color for button
+    borderRadius: 8,
+    padding: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  saveButtonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  input: {
+    borderColor: '#A09B9B', // Darker border for inputs
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 10,
   },
 });
 

@@ -1,9 +1,18 @@
+// src/App.tsx
+
 import React from 'react';
-import 'react-native-gesture-handler'; // Ensure this import is at the very top
-import AppNavigator from './src/components/navigation/index'; // Ensure this path is correct
+import {NavigationContainer} from '@react-navigation/native';
+import BottomTabNavigator from './src/components/navigation/BottomTabNavigator';
+import {TaskProvider} from './src/context/TaskContext'; // Import TaskProvider
 
 const App: React.FC = () => {
-  return <AppNavigator />;
+  return (
+    <TaskProvider>
+      <NavigationContainer>
+        <BottomTabNavigator />
+      </NavigationContainer>
+    </TaskProvider>
+  );
 };
 
 export default App;

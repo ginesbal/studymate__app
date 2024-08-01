@@ -1,26 +1,26 @@
 [
-    {
-        "id": "1",
-        "title": "Math Homework",
-        "description": "Complete exercises 1-20 on page 23",
-        "dueDate": "2023-12-15",
-        "reminderTime": "18:00",
-        "completed": false
-    },
-    {
-        "id": "2",
-        "title": "Science Project",
-        "description": "Prepare the science project presentation",
-        "dueDate": "2023-12-20",
-        "reminderTime": "10:00",
-        "completed": false
-    },
-    {
-        "id": "3",
-        "title": "History Essay",
-        "description": "Write an essay about World War II",
-        "dueDate": "2023-12-10",
-        "reminderTime": "14:00",
-        "completed": true
-    }
+  {
+    "id": "1",
+    "title": "Math Homework",
+    "description": "Complete exercises 1-20 on page 23",
+    "dueDate": "2023-12-15",
+    "reminderTime": "18:00",
+    "completed": false
+  },
+  {
+    "id": "2",
+    "title": "Science Project",
+    "description": "Prepare the science project presentation",
+    "dueDate": "2023-12-20",
+    "reminderTime": "10:00",
+    "completed": false
+  },
+  {
+    "id": "3",
+    "title": "History Essay",
+    "description": "Write an essay about World War II",
+    "dueDate": "2023-12-10",
+    "reminderTime": "14:00",
+    "completed": true
+  }
 ]

@@ -1,101 +1,69 @@
-import React, { useEffect, useState } from 'react';
-import {
-    View,
-    Text,
-    FlatList,
-    StyleSheet,
-    ActivityIndicator
-} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import TaskItem from '../components/ui/TaskItem';
-import Button from '../components/ui/Button';
-import { TaskDetailNavigationProp } from '../types';
-import tasksData from '../data/tasks.json';
+// src/screens/TaskListScreen.tsx
 
-type Task = {
-    id: string;
-    title: string;
-};
+import React, {useContext} from 'react';
+import {View, Text, StyleSheet, FlatList} from 'react-native';
+import {TaskContext} from '../context/TaskContext';
 
 const TaskListScreen: React.FC = () => {
-    const navigation = useNavigation<TaskDetailNavigationProp>();
-    const [tasks, setTasks] = useState<Task[]>([]);
-    const [loading, setLoading] = useState(true);
+  const {tasks} = useContext(TaskContext)!;
 
-    useEffect(() => {
-        const fetchTasks = async () => {
-            try {
-                // Simulate a network request delay
-                setTimeout(() => {
-                    setTasks(tasksData);
-                    setLoading(false);
-                }, 1000);
-            } catch (error) {
-                console.error('Error fetching tasks:', error);
-                setLoading(false);
-            }
-        };
+  const renderItem = ({item}: {item: any}) => (
+    <View style={styles.taskItem}>
+      <Text style={styles.taskTitle}>{item.title}</Text>
+      <Text style={styles.taskDetails}>Due: {item.dueDate}</Text>
+      <Text style={styles.taskDetails}>Reminder: {item.reminderTime}</Text>
+    </View>
+  );
 
-        fetchTasks();
-    }, []);
-
-    const renderItem = ({ item }: { item: Task }) => (
-        <TaskItem
-            title={item.title}
-            onPress={() => navigation.navigate('TaskDetailScreen', { id: item.id })}
+  return (
+    <View style={styles.container}>
+      <Text style={styles.header}>Tasks</Text>
+      {tasks.length === 0 ? (
+        <Text style={styles.noTasksMessage}>No tasks to do.</Text>
+      ) : (
+        <FlatList
+          data={tasks}
+          renderItem={renderItem}
+          keyExtractor={item => item.id}
         />
-    );
-
-    if (loading) {
-        return <ActivityIndicator size="large" color="#0000ff" />;
-    }
-
-    return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Task List</Text>
-            {tasks.length > 0 ? (
-                <FlatList
-                    data={tasks}
-                    renderItem={renderItem}
-                    keyExtractor={(item) => item.id}
-                    contentContainerStyle={styles.listContent}
-                />
-            ) : (
-                <Text style={styles.emptyMessage}>
-                    You have no tasks yet. Tap 'Add New Task' to get started.
-                </Text>
-            )}
-
-            <Button
-                title="Add New Task"
-                onPress={() => navigation.navigate('AddTaskScreen', { id: undefined })}
-            />
-        </View>
-    );
+      )}
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 16,
-        backgroundColor: '#F0EFEB',
-    },
-    title: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        marginBottom: 16,
-        textAlign: 'center',
-        color: '#283618',
-    },
-    listContent: {
-        paddingBottom: 16,
-    },
-    emptyMessage: {
-        fontSize: 16,
-        textAlign: 'center',
-        marginTop: 32,
-        color: '#777',
-    },
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#F0EFEB',
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#283618',
+    textAlign: 'center',
+  },
+  taskItem: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+  },
+  taskTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#283618',
+  },
+  taskDetails: {
+    fontSize: 16,
+    color: '#4A4A4A',
+  },
+  noTasksMessage: {
+    fontSize: 18,
+    color: '#4A4A4A',
+    textAlign: 'center',
+    marginTop: 20,
+  },
 });
 
 export default TaskListScreen;

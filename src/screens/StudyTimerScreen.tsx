@@ -81,6 +81,7 @@ const StudyTimerScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.header}>Study Timer</Text>
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -121,6 +122,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#F0EFEB',
     padding: 20,
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#283618',
+    marginBottom: 20, // Added margin to separate from other components
   },
   inputContainer: {
     flexDirection: 'row',
