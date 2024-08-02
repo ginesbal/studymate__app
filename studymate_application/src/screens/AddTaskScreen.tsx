@@ -12,7 +12,7 @@ import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Input from '../components/ui/Input';
 import {AddTaskNavigationProp, RootStackParamList} from '../types';
-import {TaskContext} from '../context/TaskContext'; // Import TaskContext
+import {TasksContext} from '../context/TasksContext'; // Import TaskContext
 import CustomAlertModal from '../components/ui/CustomAlertModal'; // Import CustomAlertModal
 
 type AddTaskRouteProp = RouteProp<RootStackParamList, 'AddTaskScreen'>;
@@ -22,7 +22,7 @@ const AddTaskScreen: React.FC = () => {
   const route = useRoute<AddTaskRouteProp>();
   const {id} = route.params || {};
 
-  const {addTask} = useContext(TaskContext)!; // Use TaskContext
+  const {addTask} = useContext(TasksContext)!; // Use TaskContext
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -55,22 +55,24 @@ const AddTaskScreen: React.FC = () => {
       return;
     }
 
-    const newTask = {
-      id: id || Date.now().toString(),
-      title,
-      description,
-      dueDate: dueDate.toISOString().slice(0, 10), // Format dueDate as YYYY-MM-DD
-      reminderTime: reminderTime
-        ? reminderTime.toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-          })
-        : '', // Format reminderTime as HH:MM
-    };
+    if (addTask) {
+      const newTask = {
+        id: id || Date.now().toString(),
+        title,
+        description,
+        dueDate: dueDate.toISOString().slice(0, 10), // Format dueDate as YYYY-MM-DD
+        reminderTime: reminderTime
+          ? reminderTime.toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            })
+          : '', // Format reminderTime as HH:MM
+        completed: false, // Initialize completed as false
+      };
 
-    addTask(newTask); // Add task to context
-
-    navigation.goBack();
+      addTask(newTask); // Add task to context
+      navigation.goBack();
+    }
   };
 
   const handlePressIn = () => {

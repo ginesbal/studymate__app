@@ -1,11 +1,21 @@
-// src/screens/TaskListScreen.tsx
-
 import React, {useContext} from 'react';
 import {View, Text, StyleSheet, FlatList} from 'react-native';
-import {TaskContext} from '../context/TaskContext';
+import {TasksContext} from '../context/TasksContext'; // Adjust the import path as needed
 
 const TaskListScreen: React.FC = () => {
-  const {tasks} = useContext(TaskContext)!;
+  const context = useContext(TasksContext);
+
+  // Handle the case where context might be undefined
+  if (!context) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.header}>Error</Text>
+        <Text style={styles.errorMessage}>Tasks context is not available.</Text>
+      </View>
+    );
+  }
+
+  const {tasks} = context; // Destructure tasks from the context
 
   const renderItem = ({item}: {item: any}) => (
     <View style={styles.taskItem}>
@@ -61,6 +71,12 @@ const styles = StyleSheet.create({
   noTasksMessage: {
     fontSize: 18,
     color: '#4A4A4A',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  errorMessage: {
+    fontSize: 18,
+    color: 'red',
     textAlign: 'center',
     marginTop: 20,
   },

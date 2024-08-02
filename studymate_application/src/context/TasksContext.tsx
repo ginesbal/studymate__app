@@ -1,5 +1,3 @@
-// src/context/TaskContext.tsx
-
 import React, {createContext, useState, ReactNode} from 'react';
 
 interface Task {
@@ -8,27 +6,40 @@ interface Task {
   description: string;
   dueDate: string;
   reminderTime: string;
+  completed: boolean; // Add this property
 }
 
-interface TaskContextType {
+type TasksContextType = {
   tasks: Task[];
   addTask: (task: Task) => void;
-}
+  updateTask: (task: Task) => void;
+  deleteTask: (id: string) => void;
+};
 
-const TaskContext = createContext<TaskContextType | undefined>(undefined);
+const TasksContext = createContext<TasksContextType | undefined>(undefined);
 
-const TaskProvider: React.FC<{children: ReactNode}> = ({children}) => {
+const TasksProvider: React.FC<{children: ReactNode}> = ({children}) => {
   const [tasks, setTasks] = useState<Task[]>([]);
 
   const addTask = (task: Task) => {
     setTasks(prevTasks => [...prevTasks, task]);
   };
 
+  const updateTask = (updatedTask: Task) => {
+    setTasks(prevTasks =>
+      prevTasks.map(task => (task.id === updatedTask.id ? updatedTask : task)),
+    );
+  };
+
+  const deleteTask = (id: string) => {
+    setTasks(prevTasks => prevTasks.filter(task => task.id !== id));
+  };
+
   return (
-    <TaskContext.Provider value={{tasks, addTask}}>
+    <TasksContext.Provider value={{tasks, addTask, updateTask, deleteTask}}>
       {children}
-    </TaskContext.Provider>
+    </TasksContext.Provider>
   );
 };
 
-export {TaskProvider, TaskContext};
+export {TasksContext, TasksProvider};

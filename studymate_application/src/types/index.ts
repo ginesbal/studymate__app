@@ -29,6 +29,7 @@ export type AddTaskNavigationProp = StackNavigationProp<
   'AddTaskScreen'
 >;
 
+// types.js
 export type Task = {
   id: string;
   title: string;
