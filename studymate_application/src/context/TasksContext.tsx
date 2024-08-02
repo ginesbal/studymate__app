@@ -1,24 +1,34 @@
-import React, { createContext, useState, ReactNode } from 'react';
-import { Task } from '../types';
+// src/context/TaskContext.tsx
 
-interface TasksContextType {
-    tasks: Task[];
-    addNewTask: (task: Task) => void;
-    setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
+import React, {createContext, useState, ReactNode} from 'react';
+
+interface Task {
+  id: string;
+  title: string;
+  description: string;
+  dueDate: string;
+  reminderTime: string;
 }
 
-export const TasksContext = createContext<TasksContextType | undefined>(undefined);
+interface TaskContextType {
+  tasks: Task[];
+  addTask: (task: Task) => void;
+}
 
-export const TasksProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [tasks, setTasks] = useState<Task[]>([]);
+const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
-    const addNewTask = (newTask: Task) => {
-        setTasks((prevTasks) => [...prevTasks, newTask]);
-    };
+const TaskProvider: React.FC<{children: ReactNode}> = ({children}) => {
+  const [tasks, setTasks] = useState<Task[]>([]);
 
-    return (
-        <TasksContext.Provider value={{ tasks, addNewTask, setTasks }}>
-            {children}
-        </TasksContext.Provider>
-    );
+  const addTask = (task: Task) => {
+    setTasks(prevTasks => [...prevTasks, task]);
+  };
+
+  return (
+    <TaskContext.Provider value={{tasks, addTask}}>
+      {children}
+    </TaskContext.Provider>
+  );
 };
+
+export {TaskProvider, TaskContext};

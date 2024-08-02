@@ -13,8 +13,6 @@ const TasksByDate: React.FC<TasksByDateProps> = ({ date, tasks, onPressTask }) =
     const renderTaskItem = ({ item }: { item: Task }) => (
         <TaskItem
             title={item.title}
-            dueDate={item.dueDate}
-            completed={item.completed}
             onPress={() => onPressTask(item.id)}
         />
     );
@@ -38,7 +36,7 @@ const styles = StyleSheet.create({
     date: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#3A86FF',
+        color: '#283618',
         marginBottom: 10,
     },
 });

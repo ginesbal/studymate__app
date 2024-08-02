@@ -1,294 +1,69 @@
-import React, { useEffect, useContext, useState } from 'react';
-import {
-    View,
-    Text,
-    SectionList,
-    ActivityIndicator,
-    StyleSheet,
-    TouchableOpacity,
-    StatusBar,
-} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import { Task, RootStackParamList } from '../types';
-import tasksData from '../data/tasks.json';
-import Button from '../components/ui/Button';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { groupTasksByDate } from '../utils/groupTasksByDate';
-import { TasksContext } from '../context/TasksContext';
+// src/screens/TaskListScreen.tsx
 
-type Props = {
-    initialTasks?: Task[];
-};
+import React, {useContext} from 'react';
+import {View, Text, StyleSheet, FlatList} from 'react-native';
+import {TaskContext} from '../context/TaskContext';
 
-const TaskListScreen: React.FC<Props> = ({ initialTasks = tasksData }) => {
-    const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'TaskListScreen'>>();
-    const context = useContext(TasksContext);
+const TaskListScreen: React.FC = () => {
+  const {tasks} = useContext(TaskContext)!;
 
-    if (!context) {
-        throw new Error("TasksContext is undefined, make sure you are using the TasksProvider");
-    }
+  const renderItem = ({item}: {item: any}) => (
+    <View style={styles.taskItem}>
+      <Text style={styles.taskTitle}>{item.title}</Text>
+      <Text style={styles.taskDetails}>Due: {item.dueDate}</Text>
+      <Text style={styles.taskDetails}>Reminder: {item.reminderTime}</Text>
+    </View>
+  );
 
-    const { tasks, addNewTask, setTasks } = context;
-    const [loading, setLoading] = useState(true);
-    const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
-    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-
-    useEffect(() => {
-        const fetchTasks = async () => {
-            try {
-                const savedTasks = await AsyncStorage.getItem('tasks');
-                if (savedTasks) {
-                    setTasks(JSON.parse(savedTasks));
-                } else {
-                    await AsyncStorage.setItem('tasks', JSON.stringify(initialTasks));
-                    setTasks(initialTasks);
-                }
-                setLoading(false);
-            } catch (error) {
-                console.error('Error fetching tasks:', error);
-                setLoading(false);
-            }
-        };
-
-        fetchTasks();
-    }, [initialTasks, setTasks]);
-
-    const handleConfirmDate = (date: Date) => {
-        setSelectedDate(date.toISOString().split('T')[0]);
-        setDatePickerVisibility(false);
-    };
-
-    const groupedTasks = groupTasksByDate(tasks);
-    const sections = Object.keys(groupedTasks).map(date => ({
-        title: date,
-        data: groupedTasks[date],
-    }));
-
-    const renderTaskItem = ({ item }: { item: Task }) => (
-        <View style={styles.taskContainer}>
-            <View style={styles.taskContent}>
-                <View style={styles.dateCircle}>
-                    <Text style={styles.dateText}>{new Date(item.dueDate).getDate()}</Text>
-                </View>
-                <View>
-                    <Text style={styles.taskTitle} numberOfLines={1} ellipsizeMode="tail">{item.title}</Text>
-                    <Text style={styles.taskSubtitle}>{item.description}</Text>
-                </View>
-            </View>
-        </View>
-    );
-
-    if (loading) {
-        return (
-            <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#3A86FF" />
-            </View>
-        );
-    }
-
-    return (
-        <View style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
-            <View style={styles.headerContainer}>
-                <Text style={styles.headerTitle}>Your Tasks</Text>
-                <TouchableOpacity onPress={() => setDatePickerVisibility(true)} style={styles.todayButton}>
-                    <Text style={styles.todayText}>Select Date</Text>
-                </TouchableOpacity>
-            </View>
-            <View style={styles.dateRow}>
-                {Array.from({ length: 7 }).map((_, index) => {
-                    const date = new Date(new Date(selectedDate).setDate(new Date(selectedDate).getDate() - new Date(selectedDate).getDay() + index));
-                    const dateString = date.toISOString().split('T')[0];
-                    const isSelected = selectedDate === dateString;
-                    return (
-                        <TouchableOpacity key={index} style={styles.dateBox} onPress={() => setSelectedDate(dateString)}>
-                            <Text style={styles.dayLabel}>{getDayOfWeek(dateString).charAt(0)}</Text>
-                            <Text style={[styles.dateLabel, isSelected && styles.activeDateLabel]}>{date.getDate()}</Text>
-                        </TouchableOpacity>
-                    );
-                })}
-            </View>
-            <DateTimePickerModal
-                isVisible={isDatePickerVisible}
-                mode="date"
-                onConfirm={handleConfirmDate}
-                onCancel={() => setDatePickerVisibility(false)}
-            />
-            <SectionList
-                sections={sections}
-                renderItem={renderTaskItem}
-                keyExtractor={(item) => item.id}
-                ListHeaderComponent={() => (
-                    <View style={styles.scheduleHeader}>
-                        <Text style={styles.sectionTitle}>Your Schedule</Text>
-                    </View>
-                )}
-                contentContainerStyle={styles.listContent}
-                ListEmptyComponent={() => (
-                    <Text style={styles.emptyMessage}>
-                        No tasks for this date. Tap 'Add New Task' to get started.
-                    </Text>
-                )}
-            />
-            <Button
-                title="Add New Task"
-                onPress={() => navigation.navigate('AddTaskScreen', { onAddTask: addNewTask })}
-                style={styles.addButton}
-                textStyle={styles.addButtonText}
-            />
-        </View>
-    );
-};
-
-const getDayOfWeek = (dateString: string) => {
-    const date = new Date(dateString);
-    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    return days[date.getUTCDay()];
-};
-
-const getFormattedDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return `${date.toLocaleDateString('en-US', { month: 'short' })} ${date.getFullYear()}`;
+  return (
+    <View style={styles.container}>
+      <Text style={styles.header}>Tasks</Text>
+      {tasks.length === 0 ? (
+        <Text style={styles.noTasksMessage}>No tasks to do.</Text>
+      ) : (
+        <FlatList
+          data={tasks}
+          renderItem={renderItem}
+          keyExtractor={item => item.id}
+        />
+      )}
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#F8F8F8',
-        padding: 20,
-    },
-    headerContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    headerTitle: {
-        fontSize: 26,
-        fontWeight: 'bold',
-        color: '#1E1E2E',
-    },
-    todayButton: {
-        backgroundColor: '#4dc591',
-        borderRadius: 10,
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-    },
-    todayText: {
-        color: '#ffffff',
-        fontSize: 16,
-        fontFamily: 'Poppins-SemiBold',
-    },
-    dateRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-    },
-    dateBox: {
-        alignItems: 'center',
-    },
-    dayLabel: {
-        color: '#bcc1cd',
-        fontSize: 14,
-        fontFamily: 'Poppins-Medium',
-    },
-    dateLabel: {
-        color: '#202525',
-        fontSize: 16,
-        fontFamily: 'Poppins-SemiBold',
-    },
-    activeDateLabel: {
-        color: '#ffffff',
-        backgroundColor: '#ff7648',
-        borderRadius: 10,
-        paddingVertical: 4,
-        paddingHorizontal: 8,
-    },
-    scheduleHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 10,
-        paddingHorizontal: 20,
-    },
-    sectionTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#1E1E2E',
-    },
-    listContent: {
-        paddingBottom: 20,
-    },
-    taskContainer: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 16,
-        padding: 16,
-        marginBottom: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-        elevation: 5,
-    },
-    taskContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    dateCircle: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: '#3A86FF',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: 10,
-    },
-    dateText: {
-        color: '#FFFFFF',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    taskTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#202525',
-    },
-    taskSubtitle: {
-        fontSize: 14,
-        color: '#88889d',
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    addButton: {
-        backgroundColor: '#2ea789',
-        borderRadius: 12,
-        paddingVertical: 15,
-        alignItems: 'center',
-        justifyContent: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 3,
-        elevation: 5,
-        marginTop: 20,
-    },
-    addButtonText: {
-        color: '#ffffff',
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
-    emptyMessage: {
-        fontSize: 16,
-        textAlign: 'center',
-        marginTop: 32,
-        color: '#88889d',
-    },
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#F0EFEB',
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#283618',
+    textAlign: 'center',
+  },
+  taskItem: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+  },
+  taskTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#283618',
+  },
+  taskDetails: {
+    fontSize: 16,
+    color: '#4A4A4A',
+  },
+  noTasksMessage: {
+    fontSize: 18,
+    color: '#4A4A4A',
+    textAlign: 'center',
+    marginTop: 20,
+  },
 });
 
 export default TaskListScreen;

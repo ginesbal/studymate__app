@@ -1,39 +1,38 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import {StyleSheet, Text, TouchableOpacity} from 'react-native';
 
 type ButtonProps = {
-    title: string;
-    onPress: () => void;
-    style?: ViewStyle;
-    textStyle?: TextStyle;
+  title: string;
+  onPress: () => void;
 };
 
-const Button: React.FC<ButtonProps> = ({ title, onPress, style, textStyle }) => {
-    return (
-        <TouchableOpacity onPress={onPress} style={[styles.button, style]}>
-            <Text style={[styles.buttonText, textStyle]}>{title}</Text>
-        </TouchableOpacity>
-    );
+const Button: React.FC<ButtonProps> = ({title, onPress}) => {
+  return (
+    <TouchableOpacity style={styles.button} onPress={onPress}>
+      <Text style={styles.buttonText}>{title}</Text>
+    </TouchableOpacity>
+  );
 };
 
 const styles = StyleSheet.create({
-    button: {
-        backgroundColor: '#3A86FF',
-        borderRadius: 12,
-        paddingVertical: 15,
-        alignItems: 'center',
-        justifyContent: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 3,
-        elevation: 5,
-    },
-    buttonText: {
-        color: '#FFFFFF',
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
+  button: {
+    backgroundColor: '#B7B7A4',
+    paddingVertical: 14,
+    paddingHorizontal: 40,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginVertical: 10,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
+  },
+  buttonText: {
+    color: '#283618',
+    fontSize: 18,
+    fontWeight: '500',
+  },
 });
 
 export default Button;

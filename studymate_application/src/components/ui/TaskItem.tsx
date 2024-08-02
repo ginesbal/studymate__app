@@ -1,63 +1,45 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 type TaskItemProps = {
     title: string;
-    dueDate: string;
-    completed: boolean;
     onPress: () => void;
 };
 
-const TaskItem: React.FC<TaskItemProps> = ({ title, dueDate, completed, onPress }) => {
+const TaskItem: React.FC<TaskItemProps> = ({ title, onPress }) => {
     return (
-        <TouchableOpacity onPress={onPress} style={styles.container}>
+        <TouchableOpacity style={styles.taskItem} onPress={onPress}>
             <View style={styles.taskContent}>
-                <Text style={styles.title}>{title}</Text>
-                <Text style={styles.dueDate}>Due: {dueDate}</Text>
+                <Text style={styles.taskText}>{title}</Text>
+                <Icon name="chevron-right" size={24} color="#ccc" />
             </View>
-            {completed ? (
-                <Text style={styles.completed}>Completed</Text>
-            ) : (
-                <Text style={styles.incomplete}>Incomplete</Text>
-            )}
         </TouchableOpacity>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 12,
-        padding: 15,
-        marginBottom: 10,
+    taskItem: {
+        backgroundColor: '#fff',
+        padding: 16,
+        marginVertical: 8,
+        borderRadius: 8,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 3,
-        elevation: 5,
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 4,
     },
     taskContent: {
-        flexDirection: 'column',
-        marginBottom: 10,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
     },
-    title: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#1E1E2E',
-    },
-    dueDate: {
-        fontSize: 14,
-        color: '#777',
-    },
-    completed: {
-        color: '#28A745',
-        fontSize: 14,
-        textAlign: 'right',
-    },
-    incomplete: {
-        color: '#DC3545',
-        fontSize: 14,
-        textAlign: 'right',
+    taskText: {
+        fontSize: 18,
+        color: '#283618',
+        flex: 1,
+        marginRight: 8,
     },
 });
 
