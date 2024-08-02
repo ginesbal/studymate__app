@@ -1,18 +1,14 @@
 import React from 'react';
-import { StyleSheet, TextInput } from 'react-native';
+import { StyleSheet, TextInput, TextInputProps, StyleProp, ViewStyle } from 'react-native';
 
-type InputProps = {
-    placeholder: string;
-    value: string;
-    onChangeText: (text: string) => void;
-    multiline?: boolean;
-    editable?: boolean;
-};
+interface InputProps extends TextInputProps {
+    style?: StyleProp<ViewStyle>;
+}
 
-const Input: React.FC<InputProps> = ({ placeholder, value, onChangeText, multiline = false, editable = true }) => {
+const Input: React.FC<InputProps> = ({ placeholder, value, onChangeText, multiline = false, editable = true, style }) => {
     return (
         <TextInput
-            style={styles.input}
+            style={[styles.input, style]}
             placeholder={placeholder}
             value={value}
             onChangeText={onChangeText}

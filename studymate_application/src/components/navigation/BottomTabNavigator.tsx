@@ -1,54 +1,32 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import HomeScreen from '../../screens/HomeScreen';
 import TaskListScreen from '../../screens/TaskListScreen';
 import AddTaskScreen from '../../screens/AddTaskScreen';
-import TaskDetailScreen from '../../screens/TaskDetailScreen';
-import { RootStackParamList } from '../../types';
+import StudyTimerScreen from '../../screens/StudyTimerScreen';
+import { StyleSheet } from 'react-native';
 
 const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator<RootStackParamList>();
-
-const HomeStack = () => (
-    <Stack.Navigator>
-        <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ title: 'Home' }} />
-        <Stack.Screen name="TaskListScreen" component={TaskListScreen} />
-        <Stack.Screen name="AddTaskScreen" component={AddTaskScreen} />
-        <Stack.Screen name="TaskDetailScreen" component={TaskDetailScreen} />
-    </Stack.Navigator>
-);
-
-const TaskListStack = () => (
-    <Stack.Navigator>
-        <Stack.Screen name="TaskListScreen" component={TaskListScreen} />
-        <Stack.Screen name="TaskDetailScreen" component={TaskDetailScreen} />
-        <Stack.Screen name="AddTaskScreen" component={AddTaskScreen} />
-    </Stack.Navigator>
-);
-
-const AddTaskStack = () => (
-    <Stack.Navigator>
-        <Stack.Screen name="AddTaskScreen" component={AddTaskScreen} />
-    </Stack.Navigator>
-);
 
 const getTabBarIcon = (route: { name: string }, color: string, size: number) => {
     let iconName: string;
 
     switch (route.name) {
-        case 'HomeStack':
+        case 'HomeScreen':
             iconName = 'home';
             break;
-        case 'TaskListStack':
+        case 'TaskListScreen':
             iconName = 'list';
             break;
-        case 'AddTaskStack':
+        case 'AddTaskScreen':
             iconName = 'add-circle';
             break;
+        case 'StudyTimerScreen':
+            iconName = 'timer';
+            break;
         default:
-            iconName = 'circle'; // Default icon
+            iconName = 'circle';
     }
 
     return <Icon name={iconName} size={size} color={color} />;
@@ -57,21 +35,35 @@ const getTabBarIcon = (route: { name: string }, color: string, size: number) => 
 const BottomTabNavigator: React.FC = () => {
     return (
         <Tab.Navigator
-            initialRouteName="HomeStack"
+            initialRouteName="HomeScreen"
             screenOptions={({ route }) => ({
                 tabBarIcon: ({ color, size }) => getTabBarIcon(route, color, size),
                 tabBarActiveTintColor: '#283618',
                 tabBarInactiveTintColor: '#B7B7A4',
-                tabBarStyle: {
-                    backgroundColor: '#F0EFEB',
-                },
+                tabBarStyle: styles.tabBar,
+                tabBarLabelStyle: styles.tabLabel,
             })}
         >
-            <Tab.Screen name="HomeStack" component={HomeStack} options={{ title: 'Home' }} />
-            <Tab.Screen name="TaskListStack" component={TaskListStack} options={{ title: 'Task List' }} />
-            <Tab.Screen name="AddTaskStack" component={AddTaskStack} options={{ title: 'Add Task' }} />
+            <Tab.Screen name="HomeScreen" component={HomeScreen as React.ComponentType<any>} options={{ title: 'Home' }} />
+            <Tab.Screen name="TaskListScreen" component={TaskListScreen} options={{ title: 'Task List' }} />
+            <Tab.Screen name="AddTaskScreen" component={AddTaskScreen} options={{ title: 'Add Task' }} />
+            <Tab.Screen name="StudyTimerScreen" component={StudyTimerScreen} options={{ title: 'Timer' }} />
         </Tab.Navigator>
     );
 };
+
+const styles = StyleSheet.create({
+    tabBar: {
+        backgroundColor: '#F0EFEB',
+        borderTopWidth: 0,
+        height: 60,
+        paddingBottom: 10,
+        paddingTop: 10,
+    },
+    tabLabel: {
+        fontSize: 12,
+        fontWeight: '600',
+    },
+});
 
 export default BottomTabNavigator;

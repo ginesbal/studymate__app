@@ -17,5 +17,14 @@ buildscript {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
     }
 }
+subprojects {
+    configurations.all {
+        it.resolutionStrategy.activateDependencyLocking()
+        }
+}
 
+
+dependencyLocking {
+    lockAllConfigurations()
+}
 apply plugin: "com.facebook.react.rootproject"
