@@ -1,46 +1,70 @@
+// src/components/ui/TaskItem.tsx
+
 import React from 'react';
-import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
-type TaskItemProps = {
-  title: string;
-  onPress: () => void;
-};
+interface TaskItemProps {
+    title: string;
+    dueDate: string;
+    completed: boolean;
+    onPress: () => void;
+}
 
-const TaskItem: React.FC<TaskItemProps> = ({title, onPress}) => {
-  return (
-    <TouchableOpacity style={styles.taskItem} onPress={onPress}>
-      <View style={styles.taskContent}>
-        <Text style={styles.taskText}>{title}</Text>
-        <Icon name="chevron-right" size={24} color="#ccc" />
-      </View>
-    </TouchableOpacity>
-  );
+const TaskItem: React.FC<TaskItemProps> = ({ title, dueDate, completed, onPress }) => {
+    return (
+        <TouchableOpacity style={styles.container} onPress={onPress}>
+            <View style={styles.content}>
+                <View style={styles.dateCircle}>
+                    <Text style={styles.dateText}>{new Date(dueDate).getDate()}</Text>
+                </View>
+                <View>
+                    <Text style={styles.title}>{title}</Text>
+                    <Text style={styles.subtitle}>{completed ? 'Completed' : 'Pending'}</Text>
+                </View>
+            </View>
+        </TouchableOpacity>
+    );
 };
 
 const styles = StyleSheet.create({
-  taskItem: {
-    backgroundColor: '#fff',
-    padding: 16,
-    marginVertical: 8,
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  taskContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  taskText: {
-    fontSize: 18,
-    color: '#283618',
-    flex: 1,
-    marginRight: 8,
-  },
+    container: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 12,
+        padding: 15,
+        marginBottom: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        elevation: 5,
+    },
+    content: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    dateCircle: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: '#3A86FF',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 10,
+    },
+    dateText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    title: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#1E1E2E',
+    },
+    subtitle: {
+        fontSize: 14,
+        color: '#A0A0A0',
+    },
 });
 
 export default TaskItem;

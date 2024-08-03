@@ -1,206 +1,290 @@
-import React, {useEffect, useState} from 'react';
+// src/screens/HomeScreen.tsx
+
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Image,
-  StyleSheet,
-  Text,
-  View,
-  SectionList,
-  StatusBar,
+    ActivityIndicator, FlatList,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
-import {Task} from '../types'; // Import types
-import tasksData from '../data/tasks.json'; // Assuming tasksData has a correct type
-import {groupTasksByDate} from '../utils/groupTasksByDate';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import TaskItem from '../components/ui/TaskItem';
+import { RootStackParamList, Task } from '../types';
+import { groupTasksByDate } from '../utils/groupTasksByDate';
+
+type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'HomeScreen'>;
 
 const HomeScreen: React.FC = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
+    const navigation = useNavigation<HomeScreenNavigationProp>();
+    const [tasks, setTasks] = useState<Task[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    // Fetch tasks (simulated here with a timeout)
-    setTimeout(() => {
-      setTasks(tasksData as Task[]); // Type assertion to ensure tasksData is treated as Task[]
-    }, 1000);
-  }, []);
+    useEffect(() => {
+        const fetchTasks = async () => {
+            try {
+                const savedTasks = await AsyncStorage.getItem('tasks');
+                if (savedTasks) {
+                    setTasks(JSON.parse(savedTasks));
+                }
+                setLoading(false);
+            } catch (error) {
+                console.error('Error fetching tasks:', error);
+                setLoading(false);
+            }
+        };
 
-  const groupedTasks = groupTasksByDate(tasks);
-  const sections = Object.keys(groupedTasks).map(date => ({
-    title: date,
-    data: groupedTasks[date],
-  }));
+        fetchTasks();
+    }, []);
 
-  const renderTaskItem = ({item}: {item: Task}) => (
-    <View style={styles.taskContainer}>
-      <View style={styles.taskContent}>
-        <View style={styles.dateCircle}>
-          <Text style={styles.dateText}>
-            {new Date(item.dueDate).getDate()}
-          </Text>
-        </View>
-        <Text style={styles.taskTitle} numberOfLines={1} ellipsizeMode="tail">
-          {item.title}
-        </Text>
-      </View>
-    </View>
-  );
+    const addNewTask = useCallback((newTask: Task) => {
+        setTasks((prevTasks) => [...prevTasks, newTask]);
+    }, []);
 
-  return (
-    <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F0EFEB" />
-      <View style={styles.headerContainer}>
-        <Image
-          source={require('../assets/images/icon.png')}
-          style={styles.icon}
+    const groupedTasks = useMemo(() => groupTasksByDate(tasks), [tasks]);
+
+    const sections = useMemo(() => Object.keys(groupedTasks).map(date => ({
+        title: date,
+        data: groupedTasks[date],
+    })), [groupedTasks]);
+
+    const getGreeting = useMemo(() => {
+        const hour = new Date().getHours();
+        if (hour < 12) return 'Good morning! 🌅';
+        if (hour < 18) return 'Good afternoon! ☀️';
+        return 'Good evening! 🌆';
+    }, []);
+
+    const renderTaskItem = useCallback(({ item }: { item: Task }) => (
+        <TaskItem
+            title={item.title}
+            dueDate={item.dueDate}
+            completed={item.completed}
+            onPress={() => navigation.navigate('TaskDetailScreen', { id: item.id })}
         />
-        <Text style={styles.title}>Welcome to StudyMate</Text>
-      </View>
-      <Text style={styles.subtitle}>Your personal study planner</Text>
-      <Text style={styles.quoteText}>
-        "The secret to getting ahead is getting started." - Mark Twain
-      </Text>
-      <View style={styles.smallSectionContainer}>
-        <Text style={styles.smallSectionTitle}>Statistics</Text>
-        <View style={styles.statisticsContainer}>
-          <Text style={styles.statisticsText}>
-            Completed: {tasks.filter(task => task.completed).length}
-          </Text>
-          <Text style={styles.statisticsText}>
-            Pending: {tasks.filter(task => !task.completed).length}
-          </Text>
+    ), [navigation]);
+
+    const subjectStyles: { [key: string]: { backgroundColor: string } } = useMemo(() => ({
+        mathematics: styles.mathematics,
+        geography: styles.geography,
+        biology: styles.biology,
+        physics: styles.physics,
+        chemistry: styles.chemistry,
+    }), []);
+
+    return (
+        <View style={styles.container}>
+            <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
+            <View style={styles.headerContainer}>
+                <Text style={styles.headerTitle}>{getGreeting}</Text>
+                <TouchableOpacity style={styles.menuButton} onPress={() => navigation.navigate('EditProfileScreen')}>
+                    <Text style={styles.menuButtonText}>⋮</Text>
+                </TouchableOpacity>
+            </View>
+            <Text style={styles.sectionTitle}>Subjects</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.subjectsContainer}>
+                {["Mathematics", "Geography", "Biology", "Physics", "Chemistry"].map((subject, index) => (
+                    <TouchableOpacity key={index} style={[styles.subjectBox, subjectStyles[subject.toLowerCase()]]}>
+                        <Text style={styles.subjectText}>{subject}</Text>
+                        <TouchableOpacity style={styles.subjectMenuButton}>
+                            <Text style={styles.subjectMenuButtonText}>⋮</Text>
+                        </TouchableOpacity>
+                    </TouchableOpacity>
+                ))}
+            </ScrollView>
+            <View style={styles.scheduleHeader}>
+                <Text style={styles.sectionTitle}>Your Schedule</Text>
+                <TouchableOpacity
+                    style={styles.viewTasksButton}
+                    onPress={() => navigation.navigate('TaskListScreen')}
+                >
+                    <Text style={styles.viewTasksButtonText}>View Tasks</Text>
+                </TouchableOpacity>
+            </View>
+            {loading ? (
+                <ActivityIndicator size="large" color="#3A86FF" style={styles.loadingIndicator} />
+            ) : (
+                <FlatList
+                    data={tasks}
+                    renderItem={renderTaskItem}
+                    keyExtractor={(item) => item.id}
+                    contentContainerStyle={styles.listContent}
+                />
+            )}
+            <TouchableOpacity
+                style={styles.fab}
+                onPress={() => navigation.navigate('AddTaskScreen', { id: undefined })}
+            >
+                <Text style={styles.fabIcon}>+</Text>
+            </TouchableOpacity>
         </View>
-      </View>
-      <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>Upcoming Tasks</Text>
-        <SectionList
-          sections={sections}
-          renderItem={renderTaskItem}
-          keyExtractor={item => item.id}
-          contentContainerStyle={styles.listContent}
-        />
-      </View>
-    </View>
-  );
-};
+    );
+}
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F0EFEB',
-    padding: 20,
-  },
-  headerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-    backgroundColor: '#EDEAE0',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  icon: {
-    width: 50,
-    height: 50,
-    marginRight: 10,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#283618',
-  },
-  subtitle: {
-    fontSize: 18,
-    color: '#283618',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  sectionContainer: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  smallSectionContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#283618',
-    marginBottom: 10,
-  },
-  smallSectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#283618',
-    marginBottom: 10,
-  },
-  dateCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#B7B7A4',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 10,
-  },
-  dateText: {
-    color: '#283618',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  statisticsText: {
-    fontSize: 16,
-    color: '#283618',
-    marginBottom: 5,
-  },
-  statisticsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  quoteText: {
-    fontSize: 16,
-    color: '#283618',
-    fontStyle: 'italic',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  listContent: {
-    paddingBottom: 20,
-  },
-  taskContainer: {
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    borderRadius: 8,
-    backgroundColor: '#FFFFFF',
-    marginBottom: 10,
-  },
-  taskContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  taskTitle: {
-    fontSize: 16,
-    color: '#283618',
-    flex: 1,
-  },
+    container: {
+        flex: 1,
+        backgroundColor: '#F8F8F8',
+        padding: 20,
+    },
+    headerContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    headerTitle: {
+        fontSize: 26,
+        fontWeight: 'bold',
+        color: '#1E1E2E',
+    },
+    menuButton: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 12,
+        padding: 10,
+        elevation: 5,
+    },
+    menuButtonText: {
+        fontSize: 18,
+        color: '#1E1E2E',
+    },
+    sectionTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#1E1E2E',
+        marginBottom: 10,
+    },
+    subjectsContainer: {
+        marginBottom: 20,
+    },
+    subjectBox: {
+        borderRadius: 12,
+        padding: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 10,
+        width: 150,
+        height: 80,
+        position: 'relative',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        elevation: 5,
+    },
+    subjectText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#FFFFFF',
+    },
+    subjectMenuButton: {
+        position: 'absolute',
+        top: 5,
+        right: 5,
+    },
+    subjectMenuButtonText: {
+        fontSize: 18,
+        color: '#FFFFFF',
+    },
+    mathematics: {
+        backgroundColor: '#FF6F61',
+    },
+    geography: {
+        backgroundColor: '#6B8E23',
+    },
+    biology: {
+        backgroundColor: '#20B2AA',
+    },
+    physics: {
+        backgroundColor: '#1E90FF',
+    },
+    chemistry: {
+        backgroundColor: '#DA70D6',
+    },
+    scheduleHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    viewTasksButton: {
+        backgroundColor: '#3A86FF',
+        borderRadius: 12,
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+    },
+    viewTasksButtonText: {
+        color: '#FFFFFF',
+        fontWeight: 'bold',
+    },
+    listContent: {
+        paddingBottom: 20,
+    },
+    taskContainer: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 12,
+        padding: 15,
+        marginBottom: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        elevation: 5,
+    },
+    taskContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    dateCircle: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: '#3A86FF',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 10,
+    },
+    dateText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    taskTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#1E1E2E',
+    },
+    taskSubtitle: {
+        fontSize: 14,
+        color: '#A0A0A0',
+    },
+    fab: {
+        position: 'absolute',
+        bottom: 30,
+        right: 30,
+        backgroundColor: '#3A86FF',
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        elevation: 5,
+    },
+    fabIcon: {
+        fontSize: 30,
+        color: '#FFFFFF',
+    },
+    loadingIndicator: {
+        marginTop: 20,
+    },
 });
 
 export default HomeScreen;
