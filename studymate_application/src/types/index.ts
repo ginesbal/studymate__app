@@ -1,5 +1,3 @@
-// src/types/index.ts
-
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 
@@ -10,6 +8,10 @@ export enum ScreenNames {
     EditProfileScreen = 'EditProfileScreen',
     TaskListScreen = 'TaskListScreen',
     StudyTimerScreen = 'StudyTimerScreen',
+    LoginScreen = 'LoginScreen',
+    SignupScreen = 'SignupScreen',
+    SettingsScreen = 'SettingsScreen',
+    BottomTabs = 'BottomTabs'
 }
 
 export type RootStackParamList = {
@@ -19,6 +21,10 @@ export type RootStackParamList = {
     EditProfileScreen: undefined;
     TaskListScreen: undefined;
     StudyTimerScreen: undefined;
+    LoginScreen: undefined;
+    SignupScreen: undefined;
+    SettingsScreen: undefined;
+    BottomTabs: undefined;
 };
 
 declare global {
@@ -27,50 +33,18 @@ declare global {
     }
 }
 
-// Navigation prop types
-export type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, ScreenNames.HomeScreen>;
-export type TaskDetailScreenNavigationProp = StackNavigationProp<RootStackParamList, ScreenNames.TaskDetailScreen>;
-export type AddTaskScreenNavigationProp = StackNavigationProp<RootStackParamList, ScreenNames.AddTaskScreen>;
-export type EditProfileScreenNavigationProp = StackNavigationProp<RootStackParamList, ScreenNames.EditProfileScreen>;
-export type TaskListScreenNavigationProp = StackNavigationProp<RootStackParamList, ScreenNames.TaskListScreen>;
-export type StudyTimerScreenNavigationProp = StackNavigationProp<RootStackParamList, ScreenNames.StudyTimerScreen>;
+export type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'LoginScreen'>;
+export type SignupScreenNavigationProp = StackNavigationProp<RootStackParamList, 'SignupScreen'>;
+export type TaskDetailScreenNavigationProp = StackNavigationProp<RootStackParamList, 'TaskDetailScreen'>;
+export type TaskDetailScreenRouteProp = RouteProp<RootStackParamList, 'TaskDetailScreen'>;
+export type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'HomeScreen'>;
+export type SettingsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'SettingsScreen'>;
 
-// Route prop types
-export type TaskDetailScreenRouteProp = RouteProp<RootStackParamList, ScreenNames.TaskDetailScreen>;
-export type AddTaskScreenRouteProp = RouteProp<RootStackParamList, ScreenNames.AddTaskScreen>;
-
-// Screen props
-export type HomeScreenProps = {
-    navigation: HomeScreenNavigationProp;
-};
-
-export type TaskDetailScreenProps = {
-    navigation: TaskDetailScreenNavigationProp;
-    route: TaskDetailScreenRouteProp;
-};
-
-export type AddTaskScreenProps = {
-    navigation: AddTaskScreenNavigationProp;
-    route: AddTaskScreenRouteProp;
-};
-
-export type EditProfileScreenProps = {
-    navigation: EditProfileScreenNavigationProp;
-};
-
-export type TaskListScreenProps = {
-    navigation: TaskListScreenNavigationProp;
-};
-
-export type StudyTimerScreenProps = {
-    navigation: StudyTimerScreenNavigationProp;
-};
-
-export type Task = {
+export interface Task {
     id: string;
     title: string;
     description: string;
     dueDate: string;
     reminderTime: string;
     completed: boolean;
-};
+}

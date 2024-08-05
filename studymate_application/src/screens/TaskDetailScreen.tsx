@@ -1,13 +1,13 @@
-// src/screens/TaskDetailScreen.tsx
-
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { TaskDetailScreenRouteProp, TaskDetailScreenNavigationProp, Task } from '../types';
+import { useTheme } from '../context/ThemeContext';
 
 const TaskDetailScreen: React.FC = () => {
+    const { theme } = useTheme();
     const route = useRoute<TaskDetailScreenRouteProp>();
     const navigation = useNavigation<TaskDetailScreenNavigationProp>();
     const { id } = route.params;
@@ -68,37 +68,37 @@ const TaskDetailScreen: React.FC = () => {
 
     if (loading) {
         return (
-            <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#3A86FF" />
+            <View style={[styles.loadingContainer, { backgroundColor: theme.backgroundColor }]}>
+                <ActivityIndicator size="large" color={theme.primaryColor} />
             </View>
         );
     }
 
     if (!task) {
         return (
-            <View style={styles.container}>
-                <Text style={styles.errorText}>Task not found</Text>
+            <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
+                <Text style={[styles.errorText, { color: theme.textColor }]}>Task not found</Text>
             </View>
         );
     }
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>{task.title}</Text>
-            <Text style={styles.description}>{task.description}</Text>
-            <Text style={styles.dueDate}>Due Date: {task.dueDate}</Text>
-            <Text style={styles.reminderTime}>Reminder Time: {task.reminderTime}</Text>
-            <TouchableOpacity style={styles.button} onPress={() => { /* Logic to mark as complete */ }}>
-                <Text style={styles.buttonText}>Mark as Complete</Text>
+        <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
+            <Text style={[styles.title, { color: theme.textColor }]}>{task.title}</Text>
+            <Text style={[styles.description, { color: theme.textColor }]}>{task.description}</Text>
+            <Text style={[styles.dueDate, { color: theme.textColor }]}>Due Date: {task.dueDate}</Text>
+            <Text style={[styles.reminderTime, { color: theme.textColor }]}>Reminder Time: {task.reminderTime}</Text>
+            <TouchableOpacity style={[styles.button, { backgroundColor: theme.primaryColor }]} onPress={() => { /* Logic to mark as complete */ }}>
+                <Text style={[styles.buttonText, { color: theme.buttonTextColor }]}>Mark as Complete</Text>
             </TouchableOpacity>
             <TouchableOpacity
-                style={styles.button}
+                style={[styles.button, { backgroundColor: theme.primaryColor }]}
                 onPress={() => navigation.navigate('AddTaskScreen', { id: task.id })}
             >
-                <Text style={styles.buttonText}>Edit Task</Text>
+                <Text style={[styles.buttonText, { color: theme.buttonTextColor }]}>Edit Task</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteTask}>
-                <Text style={styles.deleteButtonText}>Delete Task</Text>
+            <TouchableOpacity style={[styles.deleteButton, { backgroundColor: theme.secondaryColor }]} onPress={handleDeleteTask}>
+                <Text style={[styles.deleteButtonText, { color: theme.buttonTextColor }]}>Delete Task</Text>
             </TouchableOpacity>
         </View>
     );
@@ -108,31 +108,25 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        backgroundColor: '#F8F8F8',
     },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 10,
-        color: '#1E1E2E',
     },
     description: {
         fontSize: 16,
         marginBottom: 20,
-        color: '#1E1E2E',
     },
     dueDate: {
         fontSize: 16,
         marginBottom: 10,
-        color: '#1E1E2E',
     },
     reminderTime: {
         fontSize: 16,
         marginBottom: 20,
-        color: '#1E1E2E',
     },
     button: {
-        backgroundColor: '#3A86FF',
         borderRadius: 12,
         paddingVertical: 15,
         alignItems: 'center',
@@ -145,12 +139,10 @@ const styles = StyleSheet.create({
         elevation: 5,
     },
     buttonText: {
-        color: '#FFFFFF',
         fontSize: 18,
         fontWeight: 'bold',
     },
     deleteButton: {
-        backgroundColor: '#DC3545',
         borderRadius: 12,
         paddingVertical: 15,
         alignItems: 'center',
@@ -162,7 +154,6 @@ const styles = StyleSheet.create({
         elevation: 5,
     },
     deleteButtonText: {
-        color: '#FFFFFF',
         fontSize: 18,
         fontWeight: 'bold',
     },
@@ -173,7 +164,6 @@ const styles = StyleSheet.create({
     },
     errorText: {
         fontSize: 18,
-        color: '#1E1E2E',
     },
 });
 

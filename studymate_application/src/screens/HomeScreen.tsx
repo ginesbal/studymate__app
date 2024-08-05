@@ -1,5 +1,3 @@
-// src/screens/HomeScreen.tsx
-
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
     ActivityIndicator, FlatList,
@@ -12,14 +10,17 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
 import TaskItem from '../components/ui/TaskItem';
 import { RootStackParamList, Task } from '../types';
 import { groupTasksByDate } from '../utils/groupTasksByDate';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { useTheme } from '../context/ThemeContext';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'HomeScreen'>;
 
 const HomeScreen: React.FC = () => {
+    const { theme } = useTheme();
     const navigation = useNavigation<HomeScreenNavigationProp>();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -69,23 +70,23 @@ const HomeScreen: React.FC = () => {
     ), [navigation]);
 
     const subjectStyles: { [key: string]: { backgroundColor: string } } = useMemo(() => ({
-        mathematics: styles.mathematics,
-        geography: styles.geography,
-        biology: styles.biology,
-        physics: styles.physics,
-        chemistry: styles.chemistry,
-    }), []);
+        mathematics: { backgroundColor: theme.primaryColor },
+        geography: { backgroundColor: theme.secondaryColor },
+        biology: { backgroundColor: theme.secondaryColor },
+        physics: { backgroundColor: theme.primaryColor },
+        chemistry: { backgroundColor: theme.secondaryColor },
+    }), [theme]);
 
     return (
-        <View style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
+        <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
+            <StatusBar barStyle="dark-content" backgroundColor={theme.backgroundColor} />
             <View style={styles.headerContainer}>
-                <Text style={styles.headerTitle}>{getGreeting}</Text>
-                <TouchableOpacity style={styles.menuButton} onPress={() => navigation.navigate('EditProfileScreen')}>
-                    <Text style={styles.menuButtonText}>⋮</Text>
+                <Text style={[styles.headerTitle, { color: theme.textColor }]}>{getGreeting}</Text>
+                <TouchableOpacity style={styles.menuButton} onPress={() => navigation.navigate('SettingsScreen')}>
+                    <Icon name="settings" size={24} color={theme.textColor} />
                 </TouchableOpacity>
             </View>
-            <Text style={styles.sectionTitle}>Subjects</Text>
+            <Text style={[styles.sectionTitle, { color: theme.textColor }]}>Subjects</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.subjectsContainer}>
                 {["Mathematics", "Geography", "Biology", "Physics", "Chemistry"].map((subject, index) => (
                     <TouchableOpacity key={index} style={[styles.subjectBox, subjectStyles[subject.toLowerCase()]]}>
@@ -97,16 +98,16 @@ const HomeScreen: React.FC = () => {
                 ))}
             </ScrollView>
             <View style={styles.scheduleHeader}>
-                <Text style={styles.sectionTitle}>Your Schedule</Text>
+                <Text style={[styles.sectionTitle, { color: theme.textColor }]}>Your Schedule</Text>
                 <TouchableOpacity
-                    style={styles.viewTasksButton}
+                    style={[styles.viewTasksButton, { backgroundColor: theme.primaryColor }]}
                     onPress={() => navigation.navigate('TaskListScreen')}
                 >
-                    <Text style={styles.viewTasksButtonText}>View Tasks</Text>
+                    <Text style={[styles.viewTasksButtonText, { color: theme.buttonTextColor }]}>View Tasks</Text>
                 </TouchableOpacity>
             </View>
             {loading ? (
-                <ActivityIndicator size="large" color="#3A86FF" style={styles.loadingIndicator} />
+                <ActivityIndicator size="large" color={theme.primaryColor} style={styles.loadingIndicator} />
             ) : (
                 <FlatList
                     data={tasks}
@@ -116,7 +117,7 @@ const HomeScreen: React.FC = () => {
                 />
             )}
             <TouchableOpacity
-                style={styles.fab}
+                style={[styles.fab, { backgroundColor: theme.primaryColor }]}
                 onPress={() => navigation.navigate('AddTaskScreen', { id: undefined })}
             >
                 <Text style={styles.fabIcon}>+</Text>
@@ -128,7 +129,6 @@ const HomeScreen: React.FC = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F8F8F8',
         padding: 20,
     },
     headerContainer: {
@@ -140,22 +140,15 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: 26,
         fontWeight: 'bold',
-        color: '#1E1E2E',
     },
     menuButton: {
-        backgroundColor: '#FFFFFF',
         borderRadius: 12,
         padding: 10,
         elevation: 5,
     },
-    menuButtonText: {
-        fontSize: 18,
-        color: '#1E1E2E',
-    },
     sectionTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#1E1E2E',
         marginBottom: 10,
     },
     subjectsContainer: {
@@ -190,21 +183,6 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: '#FFFFFF',
     },
-    mathematics: {
-        backgroundColor: '#FF6F61',
-    },
-    geography: {
-        backgroundColor: '#6B8E23',
-    },
-    biology: {
-        backgroundColor: '#20B2AA',
-    },
-    physics: {
-        backgroundColor: '#1E90FF',
-    },
-    chemistry: {
-        backgroundColor: '#DA70D6',
-    },
     scheduleHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -212,61 +190,20 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     viewTasksButton: {
-        backgroundColor: '#3A86FF',
         borderRadius: 12,
         paddingVertical: 6,
         paddingHorizontal: 12,
     },
     viewTasksButtonText: {
-        color: '#FFFFFF',
         fontWeight: 'bold',
     },
     listContent: {
         paddingBottom: 20,
     },
-    taskContainer: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 12,
-        padding: 15,
-        marginBottom: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 3,
-        elevation: 5,
-    },
-    taskContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    dateCircle: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: '#3A86FF',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: 10,
-    },
-    dateText: {
-        color: '#FFFFFF',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    taskTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#1E1E2E',
-    },
-    taskSubtitle: {
-        fontSize: 14,
-        color: '#A0A0A0',
-    },
     fab: {
         position: 'absolute',
         bottom: 30,
         right: 30,
-        backgroundColor: '#3A86FF',
         width: 60,
         height: 60,
         borderRadius: 30,

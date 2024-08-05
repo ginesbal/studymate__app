@@ -1,19 +1,19 @@
-// src/screens/TaskListScreen.tsx
-
 import React, { useEffect, useContext, useState } from 'react';
 import { View, Text, SectionList, ActivityIndicator, StyleSheet, TouchableOpacity, StatusBar, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import DateTimePickerModal from "react-native-modal-datetime-picker";  // Add this import
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { Task, RootStackParamList } from '../types';
 import Button from '../components/ui/Button';
 import { groupTasksByDate } from '../utils/groupTasksByDate';
 import { TasksContext } from '../context/TasksContext';
+import { useTheme } from '../context/ThemeContext';
 
 type TaskListScreenNavigationProp = StackNavigationProp<RootStackParamList, 'TaskListScreen'>;
 
 const TaskListScreen: React.FC = () => {
+    const { theme } = useTheme();
     const navigation = useNavigation<TaskListScreenNavigationProp>();
     const context = useContext(TasksContext);
 
@@ -21,7 +21,7 @@ const TaskListScreen: React.FC = () => {
         throw new Error("TasksContext is undefined, make sure you are using the TasksProvider");
     }
 
-    const { tasks, addNewTask, setTasks } = context;
+    const { tasks, setTasks } = context;
     const [loading, setLoading] = useState(true);
     const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
@@ -82,17 +82,17 @@ const TaskListScreen: React.FC = () => {
 
     const renderTaskItem = ({ item }: { item: Task }) => (
         <TouchableOpacity onPress={() => navigation.navigate('TaskDetailScreen', { id: item.id })}>
-            <View style={styles.taskContainer}>
+            <View style={[styles.taskContainer, { backgroundColor: theme.buttonBackground }]}>
                 <View style={styles.taskContent}>
-                    <View style={styles.dateCircle}>
-                        <Text style={styles.dateText}>{new Date(item.dueDate).getDate()}</Text>
+                    <View style={[styles.dateCircle, { backgroundColor: theme.primaryColor }]}>
+                        <Text style={[styles.dateText, { color: theme.buttonTextColor }]}>{new Date(item.dueDate).getDate()}</Text>
                     </View>
                     <View>
-                        <Text style={styles.taskTitle} numberOfLines={1} ellipsizeMode="tail">{item.title}</Text>
-                        <Text style={styles.taskSubtitle}>{item.description}</Text>
+                        <Text style={[styles.taskTitle, { color: theme.textColor }]} numberOfLines={1} ellipsizeMode="tail">{item.title}</Text>
+                        <Text style={[styles.taskSubtitle, { color: theme.textColor }]}>{item.description}</Text>
                     </View>
-                    <TouchableOpacity onPress={() => handleDeleteTask(item.id)} style={styles.deleteButton}>
-                        <Text style={styles.deleteButtonText}>Delete</Text>
+                    <TouchableOpacity onPress={() => handleDeleteTask(item.id)} style={[styles.deleteButton, { backgroundColor: theme.secondaryColor }]}>
+                        <Text style={[styles.deleteButtonText, { color: theme.buttonTextColor }]}>Delete</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -101,19 +101,19 @@ const TaskListScreen: React.FC = () => {
 
     if (loading) {
         return (
-            <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#3A86FF" />
+            <View style={[styles.loadingContainer, { backgroundColor: theme.backgroundColor }]}>
+                <ActivityIndicator size="large" color={theme.primaryColor} />
             </View>
         );
     }
 
     return (
-        <View style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
+        <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
+            <StatusBar barStyle="dark-content" backgroundColor={theme.backgroundColor} />
             <View style={styles.headerContainer}>
-                <Text style={styles.headerTitle}>Your Tasks</Text>
-                <TouchableOpacity onPress={() => setDatePickerVisibility(true)} style={styles.todayButton}>
-                    <Text style={styles.todayText}>Select Date</Text>
+                <Text style={[styles.headerTitle, { color: theme.textColor }]}>Your Tasks</Text>
+                <TouchableOpacity onPress={() => setDatePickerVisibility(true)} style={[styles.todayButton, { backgroundColor: theme.primaryColor }]}>
+                    <Text style={[styles.todayText, { color: theme.buttonTextColor }]}>Select Date</Text>
                 </TouchableOpacity>
             </View>
             <View style={styles.dateRow}>
@@ -123,8 +123,8 @@ const TaskListScreen: React.FC = () => {
                     const isSelected = selectedDate === dateString;
                     return (
                         <TouchableOpacity key={index} style={styles.dateBox} onPress={() => setSelectedDate(dateString)}>
-                            <Text style={styles.dayLabel}>{getDayOfWeek(dateString).charAt(0)}</Text>
-                            <Text style={[styles.dateLabel, isSelected && styles.activeDateLabel]}>{date.getDate()}</Text>
+                            <Text style={[styles.dayLabel, { color: theme.textColor }]}>{getDayOfWeek(dateString).charAt(0)}</Text>
+                            <Text style={[styles.dateLabel, { color: isSelected ? theme.buttonTextColor : theme.textColor, backgroundColor: isSelected ? theme.primaryColor : theme.backgroundColor }]}>{date.getDate()}</Text>
                         </TouchableOpacity>
                     );
                 })}
@@ -141,12 +141,12 @@ const TaskListScreen: React.FC = () => {
                 keyExtractor={(item) => item.id}
                 ListHeaderComponent={() => (
                     <View style={styles.scheduleHeader}>
-                        <Text style={styles.sectionTitle}>Your Schedule</Text>
+                        <Text style={[styles.sectionTitle, { color: theme.textColor }]}>Your Schedule</Text>
                     </View>
                 )}
                 contentContainerStyle={styles.listContent}
                 ListEmptyComponent={() => (
-                    <Text style={styles.emptyMessage}>
+                    <Text style={[styles.emptyMessage, { color: theme.textColor }]}>
                         No tasks for this date. Tap 'Add New Task' to get started.
                     </Text>
                 )}
@@ -170,7 +170,6 @@ const getDayOfWeek = (dateString: string) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F8F8F8',
         padding: 20,
     },
     headerContainer: {
@@ -182,18 +181,15 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: 26,
         fontWeight: 'bold',
-        color: '#1E1E2E',
     },
     todayButton: {
-        backgroundColor: '#4dc591',
         borderRadius: 10,
         paddingVertical: 8,
         paddingHorizontal: 16,
     },
     todayText: {
-        color: '#ffffff',
         fontSize: 16,
-        fontFamily: 'Poppins-SemiBold',
+        fontWeight: '600',
     },
     dateRow: {
         flexDirection: 'row',
@@ -205,18 +201,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     dayLabel: {
-        color: '#bcc1cd',
         fontSize: 14,
-        fontFamily: 'Poppins-Medium',
+        fontWeight: '500',
     },
     dateLabel: {
-        color: '#202525',
         fontSize: 16,
-        fontFamily: 'Poppins-SemiBold',
-    },
-    activeDateLabel: {
-        color: '#ffffff',
-        backgroundColor: '#ff7648',
+        fontWeight: '600',
         borderRadius: 10,
         paddingVertical: 4,
         paddingHorizontal: 8,
@@ -231,13 +221,11 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#1E1E2E',
     },
     listContent: {
         paddingBottom: 20,
     },
     taskContainer: {
-        backgroundColor: '#FFFFFF',
         borderRadius: 16,
         padding: 16,
         marginBottom: 10,
@@ -255,24 +243,20 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: '#3A86FF',
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: 10,
     },
     dateText: {
-        color: '#FFFFFF',
         fontSize: 16,
         fontWeight: 'bold',
     },
     taskTitle: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#202525',
     },
     taskSubtitle: {
         fontSize: 14,
-        color: '#88889d',
     },
     loadingContainer: {
         flex: 1,
@@ -280,7 +264,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     addButton: {
-        backgroundColor: '#2ea789',
         borderRadius: 12,
         paddingVertical: 15,
         alignItems: 'center',
@@ -293,7 +276,6 @@ const styles = StyleSheet.create({
         marginTop: 20,
     },
     addButtonText: {
-        color: '#ffffff',
         fontSize: 18,
         fontWeight: 'bold',
     },
@@ -301,17 +283,15 @@ const styles = StyleSheet.create({
         marginLeft: 'auto',
         paddingHorizontal: 10,
         paddingVertical: 5,
-        backgroundColor: '#ff6347',
         borderRadius: 5,
     },
     deleteButtonText: {
-        color: '#fff',
+        fontSize: 14,
     },
     emptyMessage: {
         fontSize: 16,
         textAlign: 'center',
         marginTop: 32,
-        color: '#88889d',
     },
 });
 

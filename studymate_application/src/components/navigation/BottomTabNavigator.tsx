@@ -1,15 +1,16 @@
-// src/navigation/BottomTabNavigator.tsx
-
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import HomeScreen from '../../screens/HomeScreen';
 import TaskListScreen from '../../screens/TaskListScreen';
 import StudyTimerScreen from '../../screens/StudyTimerScreen';
+import { useTheme } from '../../context/ThemeContext';
 
 const Tab = createBottomTabNavigator();
 
 const BottomTabNavigator: React.FC = () => {
+    const { theme } = useTheme();
+
     return (
         <Tab.Navigator
             screenOptions={({ route }) => ({
@@ -17,13 +18,13 @@ const BottomTabNavigator: React.FC = () => {
                     let iconName: string;
 
                     switch (route.name) {
-                        case 'HomeScreen':
+                        case 'Home':
                             iconName = 'home';
                             break;
-                        case 'TaskListScreen':
+                        case 'Tasks':
                             iconName = 'list';
                             break;
-                        case 'StudyTimerScreen':
+                        case 'Timer':
                             iconName = 'timer';
                             break;
                         default:
@@ -33,13 +34,14 @@ const BottomTabNavigator: React.FC = () => {
 
                     return <Icon name={iconName} size={size} color={color} />;
                 },
-                tabBarActiveTintColor: '#3A86FF',
+                tabBarActiveTintColor: theme.primaryColor,
                 tabBarInactiveTintColor: 'gray',
+                tabBarStyle: { backgroundColor: theme.backgroundColor },
             })}
         >
-            <Tab.Screen name="HomeScreen" component={HomeScreen} options={{ tabBarLabel: 'Home' }} />
-            <Tab.Screen name="TaskListScreen" component={TaskListScreen} options={{ tabBarLabel: 'Tasks' }} />
-            <Tab.Screen name="StudyTimerScreen" component={StudyTimerScreen} options={{ tabBarLabel: 'Timer' }} />
+            <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: 'Home' }} />
+            <Tab.Screen name="Tasks" component={TaskListScreen} options={{ tabBarLabel: 'Tasks' }} />
+            <Tab.Screen name="Timer" component={StudyTimerScreen} options={{ tabBarLabel: 'Timer' }} />
         </Tab.Navigator>
     );
 };

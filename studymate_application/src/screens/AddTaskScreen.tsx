@@ -1,17 +1,17 @@
-// src/screens/AddTaskScreen.tsx
-
+import React, { useState, useContext } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import React, { useContext, useState } from 'react';
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { TasksContext } from '../context/TasksContext';
-import { RootStackParamList, Task, ScreenNames } from '../types';
+import { RootStackParamList, Task } from '../types';
+import { useTheme } from '../context/ThemeContext';
 
 type AddTaskScreenNavigationProp = StackNavigationProp<RootStackParamList, 'AddTaskScreen'>;
 
 const AddTaskScreen: React.FC = () => {
+    const { theme } = useTheme();
     const navigation = useNavigation<AddTaskScreenNavigationProp>();
     const context = useContext(TasksContext);
 
@@ -67,26 +67,26 @@ const AddTaskScreen: React.FC = () => {
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.label}>Task Title</Text>
+        <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
+            <Text style={[styles.label, { color: theme.textColor }]}>Task Title</Text>
             <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: theme.buttonBackground, color: theme.textColor }]}
                 value={title}
                 onChangeText={setTitle}
                 placeholder="Enter task title"
-                placeholderTextColor="#A9A9A9"
+                placeholderTextColor={theme.textColor}
             />
-            <Text style={styles.label}>Task Description</Text>
+            <Text style={[styles.label, { color: theme.textColor }]}>Task Description</Text>
             <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: theme.buttonBackground, color: theme.textColor }]}
                 value={description}
                 onChangeText={setDescription}
                 placeholder="Enter task description"
-                placeholderTextColor="#A9A9A9"
+                placeholderTextColor={theme.textColor}
             />
-            <Text style={styles.label}>Due Date</Text>
-            <TouchableOpacity onPress={() => setDatePickerVisibility(true)} style={styles.datePickerButton}>
-                <Text style={styles.datePickerButtonText}>{dueDate || 'Select Due Date'}</Text>
+            <Text style={[styles.label, { color: theme.textColor }]}>Due Date</Text>
+            <TouchableOpacity onPress={() => setDatePickerVisibility(true)} style={[styles.datePickerButton, { backgroundColor: theme.buttonBackground }]}>
+                <Text style={[styles.datePickerButtonText, { color: theme.textColor }]}>{dueDate || 'Select Due Date'}</Text>
             </TouchableOpacity>
             <DateTimePickerModal
                 isVisible={isDatePickerVisible}
@@ -94,9 +94,9 @@ const AddTaskScreen: React.FC = () => {
                 onConfirm={handleConfirmDate}
                 onCancel={() => setDatePickerVisibility(false)}
             />
-            <Text style={styles.label}>Reminder Time</Text>
-            <TouchableOpacity onPress={() => setTimePickerVisibility(true)} style={styles.datePickerButton}>
-                <Text style={styles.datePickerButtonText}>{reminderTime || 'Select Reminder Time'}</Text>
+            <Text style={[styles.label, { color: theme.textColor }]}>Reminder Time</Text>
+            <TouchableOpacity onPress={() => setTimePickerVisibility(true)} style={[styles.datePickerButton, { backgroundColor: theme.buttonBackground }]}>
+                <Text style={[styles.datePickerButtonText, { color: theme.textColor }]}>{reminderTime || 'Select Reminder Time'}</Text>
             </TouchableOpacity>
             <DateTimePickerModal
                 isVisible={isTimePickerVisible}
@@ -104,8 +104,8 @@ const AddTaskScreen: React.FC = () => {
                 onConfirm={handleConfirmTime}
                 onCancel={() => setTimePickerVisibility(false)}
             />
-            <TouchableOpacity style={styles.button} onPress={addTask}>
-                <Text style={styles.buttonText}>Add Task</Text>
+            <TouchableOpacity style={[styles.button, { backgroundColor: theme.primaryColor }]} onPress={addTask}>
+                <Text style={[styles.buttonText, { color: theme.buttonTextColor }]}>Add Task</Text>
             </TouchableOpacity>
         </View>
     );
@@ -115,39 +115,29 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        backgroundColor: '#F8F8F8',
     },
     label: {
         fontSize: 16,
         marginBottom: 8,
-        color: '#1E1E2E',
     },
     input: {
         borderWidth: 1,
-        borderColor: '#B7B7A4',
         borderRadius: 8,
         padding: 10,
         marginBottom: 20,
-        color: '#1E1E2E',
-        backgroundColor: '#FFFFFF',
-        fontSize: 16,
     },
     datePickerButton: {
         borderWidth: 1,
-        borderColor: '#B7B7A4',
         borderRadius: 8,
         padding: 10,
         marginBottom: 20,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#FFFFFF',
     },
     datePickerButtonText: {
-        color: '#1E1E2E',
         fontSize: 16,
     },
     button: {
-        backgroundColor: '#3A86FF',
         borderRadius: 12,
         paddingVertical: 15,
         alignItems: 'center',
@@ -159,7 +149,6 @@ const styles = StyleSheet.create({
         elevation: 5,
     },
     buttonText: {
-        color: '#FFFFFF',
         fontSize: 18,
         fontWeight: 'bold',
     },
