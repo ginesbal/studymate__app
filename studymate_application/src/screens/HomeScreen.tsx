@@ -145,7 +145,6 @@ const HomeScreen: React.FC = () => {
           'Chemistry',
           'History',
           'English',
-          'Social Studies',
           'Physiology',
           'Art',
           'Music',
