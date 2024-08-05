@@ -29,7 +29,6 @@ const CustomAlertModal: React.FC<CustomAlertModalProps> = ({
     </Modal>
   );
 };
-
 const styles = StyleSheet.create({
   modalBackground: {
     flex: 1,
@@ -47,6 +46,7 @@ const styles = StyleSheet.create({
   message: {
     fontSize: 18,
     marginBottom: 20,
+    color: 'black', // Set text color to black
   },
   okButton: {
     padding: 10,
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   okButtonText: {
-    color: 'black',
+    color: 'black', // Set text color to black
     fontSize: 16,
   },
 });

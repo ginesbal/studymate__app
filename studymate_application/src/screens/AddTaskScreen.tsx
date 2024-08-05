@@ -21,6 +21,7 @@ type AddTaskScreenNavigationProp = StackNavigationProp<
   'AddTaskScreen'
 >;
 
+// Define subjects with corresponding colors
 const subjects = [
   {name: 'Mathematics', color: '#FFA726'}, // Orange
   {name: 'Geography', color: '#66BB6A'}, // Green
@@ -141,7 +142,6 @@ const AddTaskScreen: React.FC = () => {
         mode="date"
         onConfirm={handleConfirmDate}
         onCancel={() => setDatePickerVisibility(false)}
-        // Custom styling for DateTimePickerModal might require library-specific overrides or theme adjustments
       />
       <Text style={[styles.label, {color: theme.textColor}]}>
         Reminder Time
@@ -161,7 +161,6 @@ const AddTaskScreen: React.FC = () => {
         mode="time"
         onConfirm={handleConfirmTime}
         onCancel={() => setTimePickerVisibility(false)}
-        // Custom styling for DateTimePickerModal might require library-specific overrides or theme adjustments
       />
       <Text style={[styles.label, {color: theme.textColor}]}>Subject</Text>
       <ScrollView
@@ -249,17 +248,21 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   subjectBox: {
+    borderRadius: 12,
     padding: 10,
-    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginRight: 10,
+    width: 150,
+    height: 80,
   },
   selectedSubjectBox: {
     borderWidth: 2,
-    borderColor: '#000',
+    borderColor: '#FFD700',
   },
   subjectText: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: 'bold',
   },
 });
 
