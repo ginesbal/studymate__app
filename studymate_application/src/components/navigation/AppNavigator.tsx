@@ -15,7 +15,7 @@ const MyTheme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    primary: 'blue', // Set the primary color to blue
+    primary: '#42A5F5',
   },
 };
 

@@ -141,6 +141,7 @@ const AddTaskScreen: React.FC = () => {
         mode="date"
         onConfirm={handleConfirmDate}
         onCancel={() => setDatePickerVisibility(false)}
+        // Custom styling for DateTimePickerModal might require library-specific overrides or theme adjustments
       />
       <Text style={[styles.label, {color: theme.textColor}]}>
         Reminder Time
@@ -160,6 +161,7 @@ const AddTaskScreen: React.FC = () => {
         mode="time"
         onConfirm={handleConfirmTime}
         onCancel={() => setTimePickerVisibility(false)}
+        // Custom styling for DateTimePickerModal might require library-specific overrides or theme adjustments
       />
       <Text style={[styles.label, {color: theme.textColor}]}>Subject</Text>
       <ScrollView
@@ -247,21 +249,17 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   subjectBox: {
-    borderRadius: 12,
     padding: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderRadius: 8,
     marginRight: 10,
-    width: 150,
-    height: 80,
   },
   selectedSubjectBox: {
     borderWidth: 2,
-    borderColor: '#FFD700',
+    borderColor: '#000',
   },
   subjectText: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '500',
   },
 });
 
