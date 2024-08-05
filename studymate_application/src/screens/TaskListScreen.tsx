@@ -1,5 +1,5 @@
-import React, { useEffect, useContext, useState } from 'react';
-import { View, Text, SectionList, ActivityIndicator, StyleSheet, TouchableOpacity, StatusBar, Alert } from 'react-native';
+import React, { useEffect, useContext, useState, useMemo } from 'react';
+import { View, Text, SectionList, ActivityIndicator, StyleSheet, TouchableOpacity, StatusBar, Alert, TextInput } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -9,6 +9,7 @@ import Button from '../components/ui/Button';
 import { groupTasksByDate } from '../utils/groupTasksByDate';
 import { TasksContext } from '../context/TasksContext';
 import { useTheme } from '../context/ThemeContext';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 type TaskListScreenNavigationProp = StackNavigationProp<RootStackParamList, 'TaskListScreen'>;
 
@@ -25,6 +26,8 @@ const TaskListScreen: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filterStatus, setFilterStatus] = useState<'all' | 'completed' | 'incomplete'>('all');
 
     useEffect(() => {
         const fetchTasks = async () => {
@@ -74,7 +77,29 @@ const TaskListScreen: React.FC = () => {
         );
     };
 
-    const groupedTasks = groupTasksByDate(tasks);
+    const handleToggleComplete = async (taskId: string) => {
+        const updatedTasks = tasks.map(task => {
+            if (task.id === taskId) {
+                return { ...task, completed: !task.completed };
+            }
+            return task;
+        });
+        await AsyncStorage.setItem('tasks', JSON.stringify(updatedTasks));
+        setTasks(updatedTasks);
+    };
+
+    const filteredTasks = useMemo(() => {
+        let filtered = tasks;
+        if (filterStatus !== 'all') {
+            filtered = filtered.filter(task => filterStatus === 'completed' ? task.completed : !task.completed);
+        }
+        if (searchQuery) {
+            filtered = filtered.filter(task => task.title.toLowerCase().includes(searchQuery.toLowerCase()));
+        }
+        return filtered;
+    }, [tasks, filterStatus, searchQuery]);
+
+    const groupedTasks = groupTasksByDate(filteredTasks);
     const sections = Object.keys(groupedTasks).map(date => ({
         title: date,
         data: groupedTasks[date],
@@ -91,6 +116,9 @@ const TaskListScreen: React.FC = () => {
                         <Text style={[styles.taskTitle, { color: theme.textColor }]} numberOfLines={1} ellipsizeMode="tail">{item.title}</Text>
                         <Text style={[styles.taskSubtitle, { color: theme.textColor }]}>{item.description}</Text>
                     </View>
+                    <TouchableOpacity onPress={() => handleToggleComplete(item.id)} style={[styles.completeButton, { backgroundColor: item.completed ? theme.primaryColor : theme.secondaryColor }]}>
+                        <Icon name={item.completed ? "check-circle" : "radio-button-unchecked"} size={24} color={theme.buttonTextColor} />
+                    </TouchableOpacity>
                     <TouchableOpacity onPress={() => handleDeleteTask(item.id)} style={[styles.deleteButton, { backgroundColor: theme.secondaryColor }]}>
                         <Text style={[styles.deleteButtonText, { color: theme.buttonTextColor }]}>Delete</Text>
                     </TouchableOpacity>
@@ -115,6 +143,26 @@ const TaskListScreen: React.FC = () => {
                 <TouchableOpacity onPress={() => setDatePickerVisibility(true)} style={[styles.todayButton, { backgroundColor: theme.primaryColor }]}>
                     <Text style={[styles.todayText, { color: theme.buttonTextColor }]}>Select Date</Text>
                 </TouchableOpacity>
+            </View>
+            <View style={styles.filterContainer}>
+                <TextInput
+                    style={[styles.searchInput, { backgroundColor: theme.inputBackgroundColor, color: theme.textColor }]}
+                    placeholder="Search tasks..."
+                    placeholderTextColor={theme.placeholderTextColor}
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                />
+                <View style={styles.filterButtons}>
+                    <TouchableOpacity onPress={() => setFilterStatus('all')} style={[styles.filterButton, { backgroundColor: filterStatus === 'all' ? theme.primaryColor : theme.buttonBackground }]}>
+                        <Text style={[styles.filterButtonText, { color: theme.buttonTextColor }]}>All</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setFilterStatus('completed')} style={[styles.filterButton, { backgroundColor: filterStatus === 'completed' ? theme.primaryColor : theme.buttonBackground }]}>
+                        <Text style={[styles.filterButtonText, { color: theme.buttonTextColor }]}>Completed</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setFilterStatus('incomplete')} style={[styles.filterButton, { backgroundColor: filterStatus === 'incomplete' ? theme.primaryColor : theme.buttonBackground }]}>
+                        <Text style={[styles.filterButtonText, { color: theme.buttonTextColor }]}>Incomplete</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
             <View style={styles.dateRow}>
                 {Array.from({ length: 7 }).map((_, index) => {
@@ -154,8 +202,8 @@ const TaskListScreen: React.FC = () => {
             <Button
                 title="Add New Task"
                 onPress={() => navigation.navigate('AddTaskScreen', { id: undefined })}
-                style={styles.addButton}
-                textStyle={styles.addButtonText}
+                style={StyleSheet.flatten([styles.addButton, { backgroundColor: theme.primaryColor }])}
+                textStyle={StyleSheet.flatten([styles.addButtonText, { color: theme.buttonTextColor }])}
             />
         </View>
     );
@@ -189,6 +237,31 @@ const styles = StyleSheet.create({
     },
     todayText: {
         fontSize: 16,
+        fontWeight: '600',
+    },
+    filterContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    searchInput: {
+        flex: 1,
+        padding: 10,
+        borderRadius: 8,
+        marginRight: 10,
+    },
+    filterButtons: {
+        flexDirection: 'row',
+    },
+    filterButton: {
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 8,
+        marginRight: 10,
+    },
+    filterButtonText: {
+        fontSize: 14,
         fontWeight: '600',
     },
     dateRow: {
@@ -279,8 +352,14 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
     },
-    deleteButton: {
+    completeButton: {
         marginLeft: 'auto',
+        marginRight: 10,
+        padding: 8,
+        borderRadius: 8,
+    },
+    deleteButton: {
+        marginLeft: 10,
         paddingHorizontal: 10,
         paddingVertical: 5,
         borderRadius: 5,

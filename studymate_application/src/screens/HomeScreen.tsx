@@ -82,7 +82,7 @@ const HomeScreen: React.FC = () => {
             <StatusBar barStyle="dark-content" backgroundColor={theme.backgroundColor} />
             <View style={styles.headerContainer}>
                 <Text style={[styles.headerTitle, { color: theme.textColor }]}>{getGreeting}</Text>
-                <TouchableOpacity style={styles.menuButton} onPress={() => navigation.navigate('SettingsScreen')}>
+                <TouchableOpacity style={[styles.menuButton, { backgroundColor: theme.backgroundColor }]} onPress={() => navigation.navigate('SettingsScreen')}>
                     <Icon name="settings" size={24} color={theme.textColor} />
                 </TouchableOpacity>
             </View>
@@ -90,9 +90,9 @@ const HomeScreen: React.FC = () => {
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.subjectsContainer}>
                 {["Mathematics", "Geography", "Biology", "Physics", "Chemistry"].map((subject, index) => (
                     <TouchableOpacity key={index} style={[styles.subjectBox, subjectStyles[subject.toLowerCase()]]}>
-                        <Text style={styles.subjectText}>{subject}</Text>
+                        <Text style={[styles.subjectText, { color: theme.buttonTextColor }]}>{subject}</Text>
                         <TouchableOpacity style={styles.subjectMenuButton}>
-                            <Text style={styles.subjectMenuButtonText}>⋮</Text>
+                            <Text style={[styles.subjectMenuButtonText, { color: theme.buttonTextColor }]}>⋮</Text>
                         </TouchableOpacity>
                     </TouchableOpacity>
                 ))}
@@ -144,7 +144,12 @@ const styles = StyleSheet.create({
     menuButton: {
         borderRadius: 12,
         padding: 10,
-        elevation: 5,
+        // Apply very light shadow
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 1,
+        elevation: 1,
     },
     sectionTitle: {
         fontSize: 20,
@@ -172,7 +177,6 @@ const styles = StyleSheet.create({
     subjectText: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#FFFFFF',
     },
     subjectMenuButton: {
         position: 'absolute',
@@ -181,7 +185,6 @@ const styles = StyleSheet.create({
     },
     subjectMenuButtonText: {
         fontSize: 18,
-        color: '#FFFFFF',
     },
     scheduleHeader: {
         flexDirection: 'row',

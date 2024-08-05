@@ -107,13 +107,13 @@ const StudyTimerScreen: React.FC = () => {
                         color={theme.secondaryColor}
                     />
                     <View style={styles.buttonContainer}>
-                        <TouchableOpacity style={[styles.controlButton, styles.startButton, { backgroundColor: theme.primaryColor }]} onPress={startTimer}>
+                        <TouchableOpacity style={[styles.controlButton, { backgroundColor: theme.primaryColor }]} onPress={startTimer}>
                             <Text style={[styles.controlButtonText, { color: theme.buttonTextColor }]}>Start</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={[styles.controlButton, styles.stopButton, { backgroundColor: theme.secondaryColor }]} onPress={stopTimer}>
+                        <TouchableOpacity style={[styles.controlButton, { backgroundColor: theme.secondaryColor }]} onPress={stopTimer}>
                             <Text style={[styles.controlButtonText, { color: theme.buttonTextColor }]}>Stop</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={[styles.controlButton, styles.resetButton, { backgroundColor: theme.secondaryColor }]} onPress={resetTimer}>
+                        <TouchableOpacity style={[styles.controlButton, { backgroundColor: theme.secondaryColor }]} onPress={resetTimer}>
                             <Text style={[styles.controlButtonText, { color: theme.buttonTextColor }]}>Reset</Text>
                         </TouchableOpacity>
                     </View>
@@ -196,9 +196,6 @@ const styles = StyleSheet.create({
         shadowRadius: 3,
         elevation: 5,
     },
-    startButton: {},
-    stopButton: {},
-    resetButton: {},
     controlButtonText: {
         fontSize: 18,
         fontWeight: 'bold',
@@ -206,4 +203,3 @@ const styles = StyleSheet.create({
 });
 
 export default StudyTimerScreen;
-    

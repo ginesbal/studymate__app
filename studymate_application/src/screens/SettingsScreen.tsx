@@ -1,6 +1,7 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../context/ThemeContext';
 
 const SettingsScreen: React.FC = () => {
@@ -14,7 +15,12 @@ const SettingsScreen: React.FC = () => {
 
     return (
         <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
-            <Text style={[styles.headerTitle, { color: theme.textColor }]}>Settings</Text>
+            <View style={styles.headerContainer}>
+                <TouchableOpacity onPress={() => navigation.goBack()}>
+                    <Icon name="arrow-back" size={24} color={theme.textColor} />
+                </TouchableOpacity>
+                <Text style={[styles.headerTitle, { color: theme.textColor }]}>Settings</Text>
+            </View>
             <TouchableOpacity style={[styles.button, { backgroundColor: theme.primaryColor }]} onPress={toggleTheme}>
                 <Text style={[styles.buttonText, { color: theme.buttonTextColor }]}>Toggle Theme</Text>
             </TouchableOpacity>
@@ -30,10 +36,15 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 20,
     },
-    headerTitle: {
-        fontSize: 26,
-        fontWeight: 'bold',
+    headerContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
         marginBottom: 20,
+    },
+    headerTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginLeft: 10,
     },
     button: {
         borderRadius: 8,

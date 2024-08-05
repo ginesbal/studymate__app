@@ -41,6 +41,7 @@ export type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, '
 export type SettingsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'SettingsScreen'>;
 
 export interface Task {
+    subject: string;
     id: string;
     title: string;
     description: string;

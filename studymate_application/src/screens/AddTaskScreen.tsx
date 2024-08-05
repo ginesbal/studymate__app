@@ -1,14 +1,16 @@
-import React, { useState, useContext } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import DateTimePickerModal from "react-native-modal-datetime-picker";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import React, { useContext, useState } from 'react';
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView } from 'react-native';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { TasksContext } from '../context/TasksContext';
 import { RootStackParamList, Task } from '../types';
 import { useTheme } from '../context/ThemeContext';
 
 type AddTaskScreenNavigationProp = StackNavigationProp<RootStackParamList, 'AddTaskScreen'>;
+
+const subjects = ["Mathematics", "Geography", "Biology", "Physics", "Chemistry"];
 
 const AddTaskScreen: React.FC = () => {
     const { theme } = useTheme();
@@ -27,6 +29,7 @@ const AddTaskScreen: React.FC = () => {
     const [reminderTime, setReminderTime] = useState('');
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
+    const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
 
     const handleConfirmDate = (date: Date) => {
         setDueDate(date.toISOString().split('T')[0]);
@@ -39,8 +42,8 @@ const AddTaskScreen: React.FC = () => {
     };
 
     const addTask = async () => {
-        if (!title || !dueDate) {
-            Alert.alert('Validation Error', 'Title and Due Date are required.');
+        if (!title || !dueDate || !selectedSubject) {
+            Alert.alert('Validation Error', 'Title, Due Date, and Subject are required.');
             return;
         }
 
@@ -51,6 +54,7 @@ const AddTaskScreen: React.FC = () => {
             dueDate,
             reminderTime,
             completed: false,
+            subject: selectedSubject,
         };
 
         try {
@@ -67,25 +71,25 @@ const AddTaskScreen: React.FC = () => {
     };
 
     return (
-        <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
+        <ScrollView style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
             <Text style={[styles.label, { color: theme.textColor }]}>Task Title</Text>
             <TextInput
-                style={[styles.input, { backgroundColor: theme.buttonBackground, color: theme.textColor }]}
+                style={[styles.input, { backgroundColor: theme.inputBackgroundColor, color: theme.textColor }]}
                 value={title}
                 onChangeText={setTitle}
                 placeholder="Enter task title"
-                placeholderTextColor={theme.textColor}
+                placeholderTextColor={theme.placeholderTextColor}
             />
             <Text style={[styles.label, { color: theme.textColor }]}>Task Description</Text>
             <TextInput
-                style={[styles.input, { backgroundColor: theme.buttonBackground, color: theme.textColor }]}
+                style={[styles.input, { backgroundColor: theme.inputBackgroundColor, color: theme.textColor }]}
                 value={description}
                 onChangeText={setDescription}
                 placeholder="Enter task description"
-                placeholderTextColor={theme.textColor}
+                placeholderTextColor={theme.placeholderTextColor}
             />
             <Text style={[styles.label, { color: theme.textColor }]}>Due Date</Text>
-            <TouchableOpacity onPress={() => setDatePickerVisibility(true)} style={[styles.datePickerButton, { backgroundColor: theme.buttonBackground }]}>
+            <TouchableOpacity onPress={() => setDatePickerVisibility(true)} style={[styles.datePickerButton, { backgroundColor: theme.inputBackgroundColor }]}>
                 <Text style={[styles.datePickerButtonText, { color: theme.textColor }]}>{dueDate || 'Select Due Date'}</Text>
             </TouchableOpacity>
             <DateTimePickerModal
@@ -95,7 +99,7 @@ const AddTaskScreen: React.FC = () => {
                 onCancel={() => setDatePickerVisibility(false)}
             />
             <Text style={[styles.label, { color: theme.textColor }]}>Reminder Time</Text>
-            <TouchableOpacity onPress={() => setTimePickerVisibility(true)} style={[styles.datePickerButton, { backgroundColor: theme.buttonBackground }]}>
+            <TouchableOpacity onPress={() => setTimePickerVisibility(true)} style={[styles.datePickerButton, { backgroundColor: theme.inputBackgroundColor }]}>
                 <Text style={[styles.datePickerButtonText, { color: theme.textColor }]}>{reminderTime || 'Select Reminder Time'}</Text>
             </TouchableOpacity>
             <DateTimePickerModal
@@ -104,10 +108,26 @@ const AddTaskScreen: React.FC = () => {
                 onConfirm={handleConfirmTime}
                 onCancel={() => setTimePickerVisibility(false)}
             />
+            <Text style={[styles.label, { color: theme.textColor }]}>Subject</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.subjectsContainer}>
+                {subjects.map((subject, index) => (
+                    <TouchableOpacity
+                        key={index}
+                        style={[
+                            styles.subjectBox,
+                            selectedSubject === subject ? styles.selectedSubjectBox : {},
+                            { backgroundColor: selectedSubject === subject ? theme.secondaryColor : theme.primaryColor },
+                        ]}
+                        onPress={() => setSelectedSubject(subject)}
+                    >
+                        <Text style={[styles.subjectText, { color: theme.buttonTextColor }]}>{subject}</Text>
+                    </TouchableOpacity>
+                ))}
+            </ScrollView>
             <TouchableOpacity style={[styles.button, { backgroundColor: theme.primaryColor }]} onPress={addTask}>
                 <Text style={[styles.buttonText, { color: theme.buttonTextColor }]}>Add Task</Text>
             </TouchableOpacity>
-        </View>
+        </ScrollView>
     );
 };
 
@@ -119,15 +139,19 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 16,
         marginBottom: 8,
+        fontWeight: '600',
     },
     input: {
         borderWidth: 1,
+        borderColor: '#B7B7A4',
         borderRadius: 8,
         padding: 10,
         marginBottom: 20,
+        fontSize: 16,
     },
     datePickerButton: {
         borderWidth: 1,
+        borderColor: '#B7B7A4',
         borderRadius: 8,
         padding: 10,
         marginBottom: 20,
@@ -142,6 +166,7 @@ const styles = StyleSheet.create({
         paddingVertical: 15,
         alignItems: 'center',
         justifyContent: 'center',
+        marginBottom: 10,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
@@ -150,6 +175,26 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         fontSize: 18,
+        fontWeight: 'bold',
+    },
+    subjectsContainer: {
+        marginBottom: 20,
+    },
+    subjectBox: {
+        borderRadius: 12,
+        padding: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 10,
+        width: 150,
+        height: 80,
+    },
+    selectedSubjectBox: {
+        borderWidth: 2,
+        borderColor: '#FFD700',
+    },
+    subjectText: {
+        fontSize: 16,
         fontWeight: 'bold',
     },
 });

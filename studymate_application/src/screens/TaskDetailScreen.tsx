@@ -1,3 +1,5 @@
+// src/screens/TaskDetailScreen.tsx
+
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
@@ -68,7 +70,7 @@ const TaskDetailScreen: React.FC = () => {
 
     if (loading) {
         return (
-            <View style={[styles.loadingContainer, { backgroundColor: theme.backgroundColor }]}>
+            <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color={theme.primaryColor} />
             </View>
         );
@@ -76,8 +78,8 @@ const TaskDetailScreen: React.FC = () => {
 
     if (!task) {
         return (
-            <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
-                <Text style={[styles.errorText, { color: theme.textColor }]}>Task not found</Text>
+            <View style={styles.container}>
+                <Text style={styles.errorText}>Task not found</Text>
             </View>
         );
     }
@@ -88,6 +90,7 @@ const TaskDetailScreen: React.FC = () => {
             <Text style={[styles.description, { color: theme.textColor }]}>{task.description}</Text>
             <Text style={[styles.dueDate, { color: theme.textColor }]}>Due Date: {task.dueDate}</Text>
             <Text style={[styles.reminderTime, { color: theme.textColor }]}>Reminder Time: {task.reminderTime}</Text>
+            <Text style={[styles.subject, { color: theme.textColor }]}>Subject: {task.subject}</Text>
             <TouchableOpacity style={[styles.button, { backgroundColor: theme.primaryColor }]} onPress={() => { /* Logic to mark as complete */ }}>
                 <Text style={[styles.buttonText, { color: theme.buttonTextColor }]}>Mark as Complete</Text>
             </TouchableOpacity>
@@ -97,7 +100,7 @@ const TaskDetailScreen: React.FC = () => {
             >
                 <Text style={[styles.buttonText, { color: theme.buttonTextColor }]}>Edit Task</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.deleteButton, { backgroundColor: theme.secondaryColor }]} onPress={handleDeleteTask}>
+            <TouchableOpacity style={[styles.deleteButton, { backgroundColor: theme.errorColor }]} onPress={handleDeleteTask}>
                 <Text style={[styles.deleteButtonText, { color: theme.buttonTextColor }]}>Delete Task</Text>
             </TouchableOpacity>
         </View>
@@ -125,6 +128,10 @@ const styles = StyleSheet.create({
     reminderTime: {
         fontSize: 16,
         marginBottom: 20,
+    },
+    subject: {
+        fontSize: 16,
+        marginBottom: 10,
     },
     button: {
         borderRadius: 12,
