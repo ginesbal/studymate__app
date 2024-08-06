@@ -16,15 +16,9 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import {Task, RootStackParamList} from '../types';
 import Button from '../components/ui/Button';
-<<<<<<< HEAD
-import { groupTasksByDate } from '../utils/groupTasksByDate';
-import { TasksContext, TasksContextType } from '../context/TasksContext';
-import { useTheme } from '../context/ThemeContext';
-=======
 import {groupTasksByDate} from '../utils/groupTasksByDate';
 import {TasksContext} from '../context/TasksContext';
 import {useTheme} from '../context/ThemeContext';
->>>>>>> 0cfe8c62e64026097c89a92fe2e89a9d541ede9f
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Calendar, DateData } from 'react-native-calendars';
 
@@ -38,119 +32,9 @@ const TaskListScreen: React.FC = () => {
   const navigation = useNavigation<TaskListScreenNavigationProp>();
   const context = useContext(TasksContext);
 
-<<<<<<< HEAD
-    if (!context) {
-        throw new Error("TasksContext is undefined, make sure you are using the TasksProvider");
-    }
-
-    const { tasks, setTasks } = context;
-    const [loading, setLoading] = useState(true);
-    const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
-    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [filterStatus, setFilterStatus] = useState<'all' | 'completed' | 'incomplete'>('all');
-
-    useEffect(() => {
-        const fetchTasks = async () => {
-            try {
-                const savedTasks = await AsyncStorage.getItem('tasks');
-                if (savedTasks) {
-                    setTasks(JSON.parse(savedTasks));
-                }
-                setLoading(false);
-            } catch (error) {
-                console.error('Error fetching tasks:', error);
-                setLoading(false);
-            }
-        };
-
-        fetchTasks();
-    }, [setTasks]);
-
-    const handleConfirmDate = (date: Date) => {
-        setSelectedDate(date.toISOString().split('T')[0]);
-        setDatePickerVisibility(false);
-    };
-
-    const handleDeleteTask = async (taskId: string) => {
-        Alert.alert(
-            "Delete Task",
-            "Are you sure you want to delete this task?",
-            [
-                {
-                    text: "Cancel",
-                    style: "cancel"
-                },
-                {
-                    text: "Delete",
-                    style: "destructive",
-                    onPress: async () => {
-                        try {
-                            const updatedTasks = tasks.filter((task: Task) => task.id !== taskId);
-                            await AsyncStorage.setItem('tasks', JSON.stringify(updatedTasks));
-                            setTasks(updatedTasks);
-                        } catch (error) {
-                            console.error('Error deleting task:', error);
-                        }
-                    }
-                }
-            ]
-        );
-    };
-
-    const handleToggleComplete = async (taskId: string) => {
-        const updatedTasks = tasks.map((task: Task) => {
-            if (task.id === taskId) {
-                return { ...task, completed: !task.completed };
-            }
-            return task;
-        });
-        await AsyncStorage.setItem('tasks', JSON.stringify(updatedTasks));
-        setTasks(updatedTasks);
-    };
-
-    const filteredTasks = useMemo(() => {
-        let filtered = tasks;
-        if (filterStatus !== 'all') {
-            filtered = filtered.filter((task: Task) => filterStatus === 'completed' ? task.completed : !task.completed);
-        }
-        if (searchQuery) {
-            filtered = filtered.filter((task: Task) => task.title.toLowerCase().includes(searchQuery.toLowerCase()));
-        }
-        return filtered;
-    }, [tasks, filterStatus, searchQuery]);
-
-    const groupedTasks = groupTasksByDate(filteredTasks);
-    const sections = Object.keys(groupedTasks).map(date => ({
-        title: date,
-        data: groupedTasks[date],
-    }));
-
-    const renderTaskItem = ({ item }: { item: Task }) => (
-        <TouchableOpacity onPress={() => navigation.navigate('TaskDetailScreen', { id: item.id })}>
-            <View style={[styles.taskContainer, { backgroundColor: theme.buttonBackground }]}>
-                <View style={styles.taskContent}>
-                    <View style={[styles.dateCircle, { backgroundColor: theme.primaryColor }]}>
-                        <Text style={[styles.dateText, { color: theme.buttonTextColor }]}>{new Date(item.dueDate).getDate()}</Text>
-                    </View>
-                    <View>
-                        <Text style={[styles.taskTitle, { color: theme.textColor }]} numberOfLines={1} ellipsizeMode="tail">{item.title}</Text>
-                        <Text style={[styles.taskSubtitle, { color: theme.textColor }]}>{item.description}</Text>
-                    </View>
-                    <TouchableOpacity onPress={() => handleToggleComplete(item.id)} style={[styles.completeButton, { backgroundColor: item.completed ? theme.primaryColor : theme.secondaryColor }]}>
-                        <Icon name={item.completed ? "check-circle" : "radio-button-unchecked"} size={24} color={theme.buttonTextColor} />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => handleDeleteTask(item.id)} style={[styles.deleteButton, { backgroundColor: theme.secondaryColor }]}>
-                        <Text style={[styles.deleteButtonText, { color: theme.buttonTextColor }]}>Delete</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-        </TouchableOpacity>
-=======
   if (!context) {
     throw new Error(
       'TasksContext is undefined, make sure you are using the TasksProvider',
->>>>>>> 0cfe8c62e64026097c89a92fe2e89a9d541ede9f
     );
   }
 
@@ -235,99 +119,6 @@ const TaskListScreen: React.FC = () => {
     return filtered;
   }, [tasks, filterStatus, searchQuery]);
 
-<<<<<<< HEAD
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return `${date.toLocaleString('default', { month: 'long' })} ${date.getDate()}`;
-    };
-
-    return (
-        <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
-            <StatusBar barStyle="dark-content" backgroundColor={theme.backgroundColor} />
-            <View style={styles.filterContainer}>
-                <TextInput
-                    style={[styles.searchInput, { backgroundColor: theme.inputBackgroundColor, color: theme.textColor }]}
-                    placeholder="Search tasks..."
-                    placeholderTextColor={theme.placeholderTextColor}
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                />
-            </View>
-            <View style={styles.headerContainer}>
-                <Text style={[styles.headerTitle, { color: theme.textColor }]}>{formatDate(selectedDate)}</Text>
-                <TouchableOpacity onPress={() => setDatePickerVisibility(true)} style={[styles.todayButton, { backgroundColor: theme.primaryColor }]}>
-                    <Text style={[styles.todayText, { color: theme.buttonTextColor }]}>Select Date</Text>
-                </TouchableOpacity>
-            </View>
-            <Calendar
-                onDayPress={(day: DateData) => {
-                    setSelectedDate(day.dateString);
-                }}
-                markedDates={{
-                    [selectedDate]: { selected: true, selectedColor: theme.primaryColor },
-                }}
-                theme={{
-                    calendarBackground: theme.backgroundColor,
-                    textSectionTitleColor: theme.textColor,
-                    selectedDayBackgroundColor: theme.primaryColor,
-                    selectedDayTextColor: theme.buttonTextColor,
-                    todayTextColor: theme.secondaryColor,
-                    dayTextColor: theme.textColor,
-                    textDisabledColor: theme.placeholderTextColor,
-                    arrowColor: theme.primaryColor,
-                    monthTextColor: theme.textColor,
-                    indicatorColor: theme.primaryColor,
-                }}
-            />
-            <View style={styles.filterContainer}>
-                <Text style={[styles.filterLabel, { color: theme.textColor }]}>Filter</Text>
-                <View style={styles.filterButtons}>
-                    {['All', 'Complete', 'In-Progress'].map(level => (
-                        <TouchableOpacity
-                            key={level}
-                            style={[
-                                styles.filterButton,
-                                {
-                                    backgroundColor: filterStatus === level.toLowerCase() ? theme.primaryColor : theme.buttonBackground,
-                                },
-                            ]}
-                            onPress={() => setFilterStatus(level.toLowerCase() as 'all' | 'completed' | 'incomplete')}
-                        >
-                            <Text style={[styles.filterButtonText, { color: filterStatus === level.toLowerCase() ? theme.buttonTextColor : theme.textColor }]}>
-                                {level}
-                            </Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
-            </View>
-            <DateTimePickerModal
-                isVisible={isDatePickerVisible}
-                mode="date"
-                onConfirm={handleConfirmDate}
-                onCancel={() => setDatePickerVisibility(false)}
-            />
-            <SectionList
-                sections={sections}
-                renderItem={renderTaskItem}
-                keyExtractor={(item) => item.id}
-                ListHeaderComponent={() => (
-                    <View style={styles.scheduleHeader}>
-                        <Text style={[styles.sectionTitle, { color: theme.textColor }]}>Your Schedule</Text>
-                    </View>
-                )}
-                contentContainerStyle={styles.listContent}
-                ListEmptyComponent={() => (
-                    <Text style={[styles.emptyMessage, { color: theme.textColor }]}>
-                        No tasks for this date. Tap 'Add New Task' to get started.
-                    </Text>
-                )}
-            />
-            <Button
-                title="Add New Task"
-                onPress={() => navigation.navigate('AddTaskScreen', { id: undefined })}
-                style={StyleSheet.flatten([styles.addButton, { backgroundColor: theme.primaryColor }])}
-                textStyle={StyleSheet.flatten([styles.addButtonText, { color: theme.buttonTextColor }])}
-=======
   const groupedTasks = groupTasksByDate(filteredTasks);
   const sections = Object.keys(groupedTasks).map(date => ({
     title: date,
@@ -374,7 +165,6 @@ const TaskListScreen: React.FC = () => {
               name={item.completed ? 'check-circle' : 'radio-button-unchecked'}
               size={24}
               color={theme.buttonTextColor}
->>>>>>> 0cfe8c62e64026097c89a92fe2e89a9d541ede9f
             />
           </TouchableOpacity>
           <TouchableOpacity
@@ -570,195 +360,6 @@ const getDayOfWeek = (dateString: string) => {
 };
 
 const styles = StyleSheet.create({
-<<<<<<< HEAD
-    container: {
-        flex: 1,
-        padding: 20,
-    },
-    headerContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    headerTitle: {
-        fontSize: 26,
-        fontWeight: 'bold',
-    },
-    todayButton: {
-        borderRadius: 10,
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-    },
-    todayText: {
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    calendarTitle: {
-        fontSize: 18,
-        fontWeight: '600',
-        marginBottom: 10,
-    },
-    filterContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    searchInput: {
-        flex: 1,
-        padding: 10,
-        borderRadius: 8,
-    },
-    priorityContainer: {
-        marginBottom: 20,
-    },
-    priorityButtons: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 10,
-    },
-    priorityButton: {
-        flex: 1,
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        borderRadius: 8,
-        marginHorizontal: 5,
-    },
-    priorityButtonText: {
-        fontSize: 14,
-        fontWeight: '600',
-        textAlign: 'center',
-    },
-    filterLabel: {
-        fontSize: 16,
-        fontWeight: '600',
-        marginRight: 10,
-    },
-    filterButtons: {
-        flexDirection: 'row',
-    },
-    filterButton: {
-        flex: 1,
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        borderRadius: 8,
-        marginHorizontal: 5,
-    },
-    filterButtonText: {
-        fontSize: 14,
-        fontWeight: '600',
-        textAlign: 'center',
-    },
-    dateRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-    },
-    dateBox: {
-        alignItems: 'center',
-    },
-    dayLabel: {
-        fontSize: 14,
-        fontWeight: '500',
-    },
-    dateLabel: {
-        fontSize: 16,
-        fontWeight: '600',
-        borderRadius: 10,
-        paddingVertical: 4,
-        paddingHorizontal: 8,
-    },
-    scheduleHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 10,
-        paddingHorizontal: 20,
-    },
-    sectionTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-    },
-    listContent: {
-        paddingBottom: 20,
-    },
-    taskContainer: {
-        borderRadius: 16,
-        padding: 16,
-        marginBottom: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-        elevation: 5,
-    },
-    taskContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    dateCircle: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: 10,
-    },
-    dateText: {
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    taskTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    taskSubtitle: {
-        fontSize: 14,
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    addButton: {
-        borderRadius: 12,
-        paddingVertical: 15,
-        alignItems: 'center',
-        justifyContent: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 3,
-        elevation: 5,
-        marginTop: 20,
-    },
-    addButtonText: {
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
-    completeButton: {
-        marginLeft: 'auto',
-        marginRight: 10,
-        padding: 8,
-        borderRadius: 8,
-    },
-    deleteButton: {
-        marginLeft: 10,
-        paddingHorizontal: 10,
-        paddingVertical: 5,
-        borderRadius: 5,
-    },
-    deleteButtonText: {
-        fontSize: 14,
-    },
-    emptyMessage: {
-        fontSize: 16,
-        textAlign: 'center',
-        marginTop: 32,
-    },
-=======
   container: {
     flex: 1,
     padding: 20,
@@ -915,7 +516,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 32,
   },
->>>>>>> 0cfe8c62e64026097c89a92fe2e89a9d541ede9f
 });
 
 export default TaskListScreen;
