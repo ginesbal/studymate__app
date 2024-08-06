@@ -38,7 +38,6 @@ const CustomAlertModal: React.FC<CustomAlertModalProps> = ({
     </Modal>
   );
 };
-
 const styles = StyleSheet.create({
   modalBackground: {
     flex: 1,
@@ -66,7 +65,11 @@ const styles = StyleSheet.create({
   message: {
     fontSize: 16,
     marginBottom: 20,
+<<<<<<< HEAD:studymate_application/src/components/pickers/CustomAlertModal.tsx
     textAlign: 'center',
+=======
+    color: 'black', // Set text color to black
+>>>>>>> 0cfe8c62e64026097c89a92fe2e89a9d541ede9f:studymate_application/src/components/ui/CustomAlertModal.tsx
   },
   okButton: {
     paddingVertical: 12,
@@ -77,7 +80,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   okButtonText: {
+<<<<<<< HEAD:studymate_application/src/components/pickers/CustomAlertModal.tsx
     color: 'white',
+=======
+    color: 'black', // Set text color to black
+>>>>>>> 0cfe8c62e64026097c89a92fe2e89a9d541ede9f:studymate_application/src/components/ui/CustomAlertModal.tsx
     fontSize: 16,
     fontWeight: 'bold',
   },
