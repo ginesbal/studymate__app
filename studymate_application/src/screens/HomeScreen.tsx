@@ -1,57 +1,31 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
     ActivityIndicator, FlatList,
-    ScrollView,
     StatusBar,
     StyleSheet,
     Text,
     TouchableOpacity,
     View
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import TaskItem from '../components/ui/TaskItem';
-import { RootStackParamList, Task } from '../types';
 import { groupTasksByDate } from '../utils/groupTasksByDate';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useTheme } from '../context/ThemeContext';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import Header from '../components/ui/Header';
+import SubjectList from '../components/ui/SubjectList';
+import ScheduleHeader from '../components/ui/ScheduleHeader';
+import { useTasks } from '../context/TasksContext';
+import { RootStackParamList, Task } from '../types';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'HomeScreen'>;
 
 const HomeScreen: React.FC = () => {
     const { theme } = useTheme();
     const navigation = useNavigation<HomeScreenNavigationProp>();
-    const [tasks, setTasks] = useState<Task[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-
-    useEffect(() => {
-        const fetchTasks = async () => {
-            try {
-                const savedTasks = await AsyncStorage.getItem('tasks');
-                if (savedTasks) {
-                    setTasks(JSON.parse(savedTasks));
-                }
-                setLoading(false);
-            } catch (error) {
-                console.error('Error fetching tasks:', error);
-                setLoading(false);
-            }
-        };
-
-        fetchTasks();
-    }, []);
-
-    const addNewTask = useCallback((newTask: Task) => {
-        setTasks((prevTasks) => [...prevTasks, newTask]);
-    }, []);
+    const { tasks, loading, error } = useTasks();
 
     const groupedTasks = useMemo(() => groupTasksByDate(tasks), [tasks]);
-
-    const sections = useMemo(() => Object.keys(groupedTasks).map(date => ({
-        title: date,
-        data: groupedTasks[date],
-    })), [groupedTasks]);
 
     const getGreeting = useMemo(() => {
         const hour = new Date().getHours();
@@ -80,34 +54,14 @@ const HomeScreen: React.FC = () => {
     return (
         <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
             <StatusBar barStyle="dark-content" backgroundColor={theme.backgroundColor} />
-            <View style={styles.headerContainer}>
-                <Text style={[styles.headerTitle, { color: theme.textColor }]}>{getGreeting}</Text>
-                <TouchableOpacity style={[styles.menuButton, { backgroundColor: theme.backgroundColor }]} onPress={() => navigation.navigate('SettingsScreen')}>
-                    <Icon name="settings" size={24} color={theme.textColor} />
-                </TouchableOpacity>
-            </View>
+            <Header greeting={getGreeting} onSettingsPress={() => navigation.navigate('SettingsScreen')} />
             <Text style={[styles.sectionTitle, { color: theme.textColor }]}>Subjects</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.subjectsContainer}>
-                {["Mathematics", "Geography", "Biology", "Physics", "Chemistry"].map((subject, index) => (
-                    <TouchableOpacity key={index} style={[styles.subjectBox, subjectStyles[subject.toLowerCase()]]}>
-                        <Text style={[styles.subjectText, { color: theme.buttonTextColor }]}>{subject}</Text>
-                        <TouchableOpacity style={styles.subjectMenuButton}>
-                            <Text style={[styles.subjectMenuButtonText, { color: theme.buttonTextColor }]}>⋮</Text>
-                        </TouchableOpacity>
-                    </TouchableOpacity>
-                ))}
-            </ScrollView>
-            <View style={styles.scheduleHeader}>
-                <Text style={[styles.sectionTitle, { color: theme.textColor }]}>Your Schedule</Text>
-                <TouchableOpacity
-                    style={[styles.viewTasksButton, { backgroundColor: theme.primaryColor }]}
-                    onPress={() => navigation.navigate('TaskListScreen')}
-                >
-                    <Text style={[styles.viewTasksButtonText, { color: theme.buttonTextColor }]}>View Tasks</Text>
-                </TouchableOpacity>
-            </View>
+            <SubjectList subjectStyles={subjectStyles} />
+            <ScheduleHeader onViewTasksPress={() => navigation.navigate('TaskListScreen')} />
             {loading ? (
                 <ActivityIndicator size="large" color={theme.primaryColor} style={styles.loadingIndicator} />
+            ) : error ? (
+                <Text style={[styles.errorText, { color: theme.errorColor }]}>{error}</Text>
             ) : (
                 <FlatList
                     data={tasks}
@@ -131,74 +85,10 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 20,
     },
-    headerContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    headerTitle: {
-        fontSize: 26,
-        fontWeight: 'bold',
-    },
-    menuButton: {
-        borderRadius: 12,
-        padding: 10,
-        // Apply very light shadow
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 1,
-        elevation: 1,
-    },
     sectionTitle: {
         fontSize: 20,
         fontWeight: 'bold',
         marginBottom: 10,
-    },
-    subjectsContainer: {
-        marginBottom: 20,
-    },
-    subjectBox: {
-        borderRadius: 12,
-        padding: 10,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: 10,
-        width: 150,
-        height: 80,
-        position: 'relative',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 3,
-        elevation: 5,
-    },
-    subjectText: {
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    subjectMenuButton: {
-        position: 'absolute',
-        top: 5,
-        right: 5,
-    },
-    subjectMenuButtonText: {
-        fontSize: 18,
-    },
-    scheduleHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 10,
-    },
-    viewTasksButton: {
-        borderRadius: 12,
-        paddingVertical: 6,
-        paddingHorizontal: 12,
-    },
-    viewTasksButtonText: {
-        fontWeight: 'bold',
     },
     listContent: {
         paddingBottom: 20,
@@ -223,6 +113,11 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
     },
     loadingIndicator: {
+        marginTop: 20,
+    },
+    errorText: {
+        textAlign: 'center',
+        fontSize: 16,
         marginTop: 20,
     },
 });

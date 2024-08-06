@@ -7,9 +7,10 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { Task, RootStackParamList } from '../types';
 import Button from '../components/ui/Button';
 import { groupTasksByDate } from '../utils/groupTasksByDate';
-import { TasksContext } from '../context/TasksContext';
+import { TasksContext, TasksContextType } from '../context/TasksContext';
 import { useTheme } from '../context/ThemeContext';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Calendar, DateData } from 'react-native-calendars';
 
 type TaskListScreenNavigationProp = StackNavigationProp<RootStackParamList, 'TaskListScreen'>;
 
@@ -65,7 +66,7 @@ const TaskListScreen: React.FC = () => {
                     style: "destructive",
                     onPress: async () => {
                         try {
-                            const updatedTasks = tasks.filter(task => task.id !== taskId);
+                            const updatedTasks = tasks.filter((task: Task) => task.id !== taskId);
                             await AsyncStorage.setItem('tasks', JSON.stringify(updatedTasks));
                             setTasks(updatedTasks);
                         } catch (error) {
@@ -78,7 +79,7 @@ const TaskListScreen: React.FC = () => {
     };
 
     const handleToggleComplete = async (taskId: string) => {
-        const updatedTasks = tasks.map(task => {
+        const updatedTasks = tasks.map((task: Task) => {
             if (task.id === taskId) {
                 return { ...task, completed: !task.completed };
             }
@@ -91,10 +92,10 @@ const TaskListScreen: React.FC = () => {
     const filteredTasks = useMemo(() => {
         let filtered = tasks;
         if (filterStatus !== 'all') {
-            filtered = filtered.filter(task => filterStatus === 'completed' ? task.completed : !task.completed);
+            filtered = filtered.filter((task: Task) => filterStatus === 'completed' ? task.completed : !task.completed);
         }
         if (searchQuery) {
-            filtered = filtered.filter(task => task.title.toLowerCase().includes(searchQuery.toLowerCase()));
+            filtered = filtered.filter((task: Task) => task.title.toLowerCase().includes(searchQuery.toLowerCase()));
         }
         return filtered;
     }, [tasks, filterStatus, searchQuery]);
@@ -135,15 +136,14 @@ const TaskListScreen: React.FC = () => {
         );
     }
 
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return `${date.toLocaleString('default', { month: 'long' })} ${date.getDate()}`;
+    };
+
     return (
         <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
             <StatusBar barStyle="dark-content" backgroundColor={theme.backgroundColor} />
-            <View style={styles.headerContainer}>
-                <Text style={[styles.headerTitle, { color: theme.textColor }]}>Your Tasks</Text>
-                <TouchableOpacity onPress={() => setDatePickerVisibility(true)} style={[styles.todayButton, { backgroundColor: theme.primaryColor }]}>
-                    <Text style={[styles.todayText, { color: theme.buttonTextColor }]}>Select Date</Text>
-                </TouchableOpacity>
-            </View>
             <View style={styles.filterContainer}>
                 <TextInput
                     style={[styles.searchInput, { backgroundColor: theme.inputBackgroundColor, color: theme.textColor }]}
@@ -152,30 +152,53 @@ const TaskListScreen: React.FC = () => {
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                 />
-                <View style={styles.filterButtons}>
-                    <TouchableOpacity onPress={() => setFilterStatus('all')} style={[styles.filterButton, { backgroundColor: filterStatus === 'all' ? theme.primaryColor : theme.buttonBackground }]}>
-                        <Text style={[styles.filterButtonText, { color: theme.buttonTextColor }]}>All</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => setFilterStatus('completed')} style={[styles.filterButton, { backgroundColor: filterStatus === 'completed' ? theme.primaryColor : theme.buttonBackground }]}>
-                        <Text style={[styles.filterButtonText, { color: theme.buttonTextColor }]}>Completed</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => setFilterStatus('incomplete')} style={[styles.filterButton, { backgroundColor: filterStatus === 'incomplete' ? theme.primaryColor : theme.buttonBackground }]}>
-                        <Text style={[styles.filterButtonText, { color: theme.buttonTextColor }]}>Incomplete</Text>
-                    </TouchableOpacity>
-                </View>
             </View>
-            <View style={styles.dateRow}>
-                {Array.from({ length: 7 }).map((_, index) => {
-                    const date = new Date(new Date(selectedDate).setDate(new Date(selectedDate).getDate() - new Date(selectedDate).getDay() + index));
-                    const dateString = date.toISOString().split('T')[0];
-                    const isSelected = selectedDate === dateString;
-                    return (
-                        <TouchableOpacity key={index} style={styles.dateBox} onPress={() => setSelectedDate(dateString)}>
-                            <Text style={[styles.dayLabel, { color: theme.textColor }]}>{getDayOfWeek(dateString).charAt(0)}</Text>
-                            <Text style={[styles.dateLabel, { color: isSelected ? theme.buttonTextColor : theme.textColor, backgroundColor: isSelected ? theme.primaryColor : theme.backgroundColor }]}>{date.getDate()}</Text>
+            <View style={styles.headerContainer}>
+                <Text style={[styles.headerTitle, { color: theme.textColor }]}>{formatDate(selectedDate)}</Text>
+                <TouchableOpacity onPress={() => setDatePickerVisibility(true)} style={[styles.todayButton, { backgroundColor: theme.primaryColor }]}>
+                    <Text style={[styles.todayText, { color: theme.buttonTextColor }]}>Select Date</Text>
+                </TouchableOpacity>
+            </View>
+            <Calendar
+                onDayPress={(day: DateData) => {
+                    setSelectedDate(day.dateString);
+                }}
+                markedDates={{
+                    [selectedDate]: { selected: true, selectedColor: theme.primaryColor },
+                }}
+                theme={{
+                    calendarBackground: theme.backgroundColor,
+                    textSectionTitleColor: theme.textColor,
+                    selectedDayBackgroundColor: theme.primaryColor,
+                    selectedDayTextColor: theme.buttonTextColor,
+                    todayTextColor: theme.secondaryColor,
+                    dayTextColor: theme.textColor,
+                    textDisabledColor: theme.placeholderTextColor,
+                    arrowColor: theme.primaryColor,
+                    monthTextColor: theme.textColor,
+                    indicatorColor: theme.primaryColor,
+                }}
+            />
+            <View style={styles.filterContainer}>
+                <Text style={[styles.filterLabel, { color: theme.textColor }]}>Filter</Text>
+                <View style={styles.filterButtons}>
+                    {['All', 'Complete', 'In-Progress'].map(level => (
+                        <TouchableOpacity
+                            key={level}
+                            style={[
+                                styles.filterButton,
+                                {
+                                    backgroundColor: filterStatus === level.toLowerCase() ? theme.primaryColor : theme.buttonBackground,
+                                },
+                            ]}
+                            onPress={() => setFilterStatus(level.toLowerCase() as 'all' | 'completed' | 'incomplete')}
+                        >
+                            <Text style={[styles.filterButtonText, { color: filterStatus === level.toLowerCase() ? theme.buttonTextColor : theme.textColor }]}>
+                                {level}
+                            </Text>
                         </TouchableOpacity>
-                    );
-                })}
+                    ))}
+                </View>
             </View>
             <DateTimePickerModal
                 isVisible={isDatePickerVisible}
@@ -239,6 +262,11 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '600',
     },
+    calendarTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        marginBottom: 10,
+    },
     filterContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -249,20 +277,46 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 10,
         borderRadius: 8,
+    },
+    priorityContainer: {
+        marginBottom: 20,
+    },
+    priorityButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 10,
+    },
+    priorityButton: {
+        flex: 1,
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 8,
+        marginHorizontal: 5,
+    },
+    priorityButtonText: {
+        fontSize: 14,
+        fontWeight: '600',
+        textAlign: 'center',
+    },
+    filterLabel: {
+        fontSize: 16,
+        fontWeight: '600',
         marginRight: 10,
     },
     filterButtons: {
         flexDirection: 'row',
     },
     filterButton: {
+        flex: 1,
         paddingVertical: 8,
         paddingHorizontal: 12,
         borderRadius: 8,
-        marginRight: 10,
+        marginHorizontal: 5,
     },
     filterButtonText: {
         fontSize: 14,
         fontWeight: '600',
+        textAlign: 'center',
     },
     dateRow: {
         flexDirection: 'row',

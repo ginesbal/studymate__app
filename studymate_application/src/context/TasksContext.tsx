@@ -1,37 +1,68 @@
-// src/context/TasksContext.tsx
-
-import React, { createContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Task } from '../types';
 
-interface TasksContextProps {
+interface TasksContextType {
     tasks: Task[];
-    addNewTask: (task: Task) => void;
-    updateTask: (task: Task) => void;
-    setTasks: (tasks: Task[]) => void;
+    loading: boolean;
+    error: string | null;
+    addNewTask: (newTask: Task) => void;
+    setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
 }
+
+const TasksContext = createContext<TasksContextType>({
+    tasks: [],
+    loading: true,
+    error: null,
+    addNewTask: () => {},
+    setTasks: () => {},
+});
 
 interface TasksProviderProps {
     children: ReactNode;
 }
 
-export const TasksContext = createContext<TasksContextProps | undefined>(undefined);
-
 export const TasksProvider: React.FC<TasksProviderProps> = ({ children }) => {
     const [tasks, setTasks] = useState<Task[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
 
-    const addNewTask = (task: Task) => {
-        setTasks((prevTasks) => [...prevTasks, task]);
-    };
+    useEffect(() => {
+        const fetchTasks = async () => {
+            try {
+                const savedTasks = await AsyncStorage.getItem('tasks');
+                if (savedTasks) {
+                    setTasks(JSON.parse(savedTasks));
+                }
+            } catch (error) {
+                setError('Error fetching tasks. Please try again later.');
+                console.error('Error fetching tasks:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    const updateTask = (updatedTask: Task) => {
-        setTasks((prevTasks) =>
-            prevTasks.map((task) => (task.id === updatedTask.id ? updatedTask : task))
-        );
-    };
+        fetchTasks();
+    }, []);
+
+    const addNewTask = useCallback((newTask: Task) => {
+        setTasks((prevTasks) => [...prevTasks, newTask]);
+    }, []);
 
     return (
-        <TasksContext.Provider value={{ tasks, addNewTask, updateTask, setTasks }}>
+        <TasksContext.Provider value={{ tasks, loading, error, addNewTask, setTasks }}>
             {children}
         </TasksContext.Provider>
     );
 };
+
+export const useTasks = (): TasksContextType => {
+    const context = useContext(TasksContext);
+    if (context === undefined) {
+        throw new Error('useTasks must be used within a TasksProvider');
+    }
+    return context;
+};
+
+export { TasksContext };
+export type { TasksContextType }; // Use export type

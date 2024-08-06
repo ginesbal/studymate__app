@@ -48,4 +48,7 @@ export interface Task {
     dueDate: string;
     reminderTime: string;
     completed: boolean;
+    priority: 'Low' | 'Medium' | 'High';
+    startTime: string;
+    endTime: string;
 }

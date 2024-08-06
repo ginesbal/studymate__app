@@ -1,5 +1,3 @@
-// src/context/ThemeContext.tsx
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface Theme {
@@ -12,7 +10,7 @@ interface Theme {
     separatorColor: string;
     inputBackgroundColor: string;
     placeholderTextColor: string;
-    errorColor: string;  // Add this line
+    errorColor: string;
 }
 
 interface ThemeContextType {
@@ -22,29 +20,29 @@ interface ThemeContextType {
 }
 
 const lightTheme: Theme = {
-    backgroundColor: '#F8F8F8',
-    textColor: '#1E1E2E',
-    buttonBackground: '#3A86FF',
-    buttonTextColor: '#FFFFFF',
-    primaryColor: '#3A86FF',
-    secondaryColor: '#FF7648',
-    separatorColor: '#212523',
-    inputBackgroundColor: '#FFFFFF',
-    placeholderTextColor: '#A9A9A9',
-    errorColor: '#DC3545',  // Add this line
+    backgroundColor: '#ffffff', // white
+    textColor: '#212523', // [#212523]
+    buttonBackground: '#ff7648', // [#ff7648]
+    buttonTextColor: '#ffffff', // white
+    primaryColor: '#182a88',  // [#182a88]
+    secondaryColor: '#212523', // [#212523]
+    separatorColor: '#212523', // [#212523]
+    inputBackgroundColor: '#bcc1cd', // [#bcc1cd]
+    placeholderTextColor: '#ffc278', // [#ffc278]
+    errorColor: '#DC3545',  // Same as before
 };
 
 const darkTheme: Theme = {
-    backgroundColor: '#1E1E2E',
-    textColor: '#F8F8F8',
-    buttonBackground: '#FF7648',
-    buttonTextColor: '#1E1E2E',
-    primaryColor: '#3A86FF',
-    secondaryColor: '#FF7648',
-    separatorColor: '#A9A9A9',
-    inputBackgroundColor: '#333',
-    placeholderTextColor: '#666',
-    errorColor: '#FF6347',  // Add this line
+    backgroundColor: '#212523', // [#212523]
+    textColor: '#ffffff', // white
+    buttonBackground: '#ff7648', // [#ff7648]
+    buttonTextColor: '#ffffff', // white
+    primaryColor: '#182a88',  // [#182a88]
+    secondaryColor: '#8f98ff', // [#8f98ff]
+    separatorColor: '#bcc1cd', // [#bcc1cd]
+    inputBackgroundColor: '#333', // Keeping dark background for inputs
+    placeholderTextColor: '#666', // Keeping gray for placeholders
+    errorColor: '#FF6347',  // Same as before
 };
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);

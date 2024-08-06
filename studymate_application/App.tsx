@@ -1,15 +1,16 @@
-// src/App.tsx
-
 import React from 'react';
-import AppNavigator from './src/components/navigation/AppNavigator';
+import { NavigationContainer } from '@react-navigation/native';
 import { TasksProvider } from './src/context/TasksContext';
 import { ThemeProvider } from './src/context/ThemeContext';
+import AppNavigator from './src/components/navigation/AppNavigator';
 
 const App: React.FC = () => {
     return (
         <ThemeProvider>
             <TasksProvider>
-                <AppNavigator />
+                <NavigationContainer>
+                    <AppNavigator />
+                </NavigationContainer>
             </TasksProvider>
         </ThemeProvider>
     );
