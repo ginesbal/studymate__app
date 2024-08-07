@@ -1,10 +1,6 @@
 import React from 'react';
-<<<<<<< HEAD
-import { createStackNavigator } from '@react-navigation/stack';
-=======
 import {NavigationContainer, DefaultTheme} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
->>>>>>> 0cfe8c62e64026097c89a92fe2e89a9d541ede9f
 import BottomTabNavigator from './BottomTabNavigator';
 import TaskDetailScreen from '../../screens/TaskDetailScreen';
 import SettingsScreen from '../../screens/SettingsScreen';
@@ -28,18 +24,6 @@ const MyTheme = {
 };
 
 const AppNavigator: React.FC = () => {
-<<<<<<< HEAD
-    return (
-        <Stack.Navigator initialRouteName="BottomTabs">
-            <Stack.Screen name="BottomTabs" component={BottomTabNavigator} options={{ headerShown: false }} />
-            <Stack.Screen name="TaskDetailScreen" component={TaskDetailScreen} />
-            <Stack.Screen name="SettingsScreen" component={SettingsScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="AddTaskScreen" component={AddTaskScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="TaskListScreen" component={TaskListScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="StudyTimerScreen" component={StudyTimerScreen} />
-        </Stack.Navigator>
-    );
-=======
   return (
     <NavigationContainer theme={MyTheme}>
       <Stack.Navigator
@@ -114,7 +98,6 @@ const AppNavigator: React.FC = () => {
       </Stack.Navigator>
     </NavigationContainer>
   );
->>>>>>> 0cfe8c62e64026097c89a92fe2e89a9d541ede9f
 };
 
 export default AppNavigator;

@@ -1,24 +1,3 @@
-<<<<<<< HEAD
-import React, { useCallback, useMemo } from 'react';
-import {
-    ActivityIndicator, FlatList,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
-} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import TaskItem from '../components/ui/TaskItem';
-import { groupTasksByDate } from '../utils/groupTasksByDate';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { useTheme } from '../context/ThemeContext';
-import Header from '../components/ui/Header';
-import SubjectList from '../components/ui/SubjectList';
-import ScheduleHeader from '../components/ui/ScheduleHeader';
-import { useTasks } from '../context/TasksContext';
-import { RootStackParamList, Task } from '../types';
-=======
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
   ActivityIndicator,
@@ -38,7 +17,6 @@ import {groupTasksByDate} from '../utils/groupTasksByDate';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {useTheme} from '../context/ThemeContext';
 import Icon from 'react-native-vector-icons/MaterialIcons';
->>>>>>> 0cfe8c62e64026097c89a92fe2e89a9d541ede9f
 
 type HomeScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -46,11 +24,6 @@ type HomeScreenNavigationProp = StackNavigationProp<
 >;
 
 const HomeScreen: React.FC = () => {
-<<<<<<< HEAD
-    const { theme } = useTheme();
-    const navigation = useNavigation<HomeScreenNavigationProp>();
-    const { tasks, loading, error } = useTasks();
-=======
   const {theme} = useTheme();
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -76,18 +49,9 @@ const HomeScreen: React.FC = () => {
   const addNewTask = useCallback((newTask: Task) => {
     setTasks(prevTasks => [...prevTasks, newTask]);
   }, []);
->>>>>>> 0cfe8c62e64026097c89a92fe2e89a9d541ede9f
 
   const groupedTasks = useMemo(() => groupTasksByDate(tasks), [tasks]);
 
-<<<<<<< HEAD
-    const getGreeting = useMemo(() => {
-        const hour = new Date().getHours();
-        if (hour < 12) return 'Good morning! 🌅';
-        if (hour < 18) return 'Good afternoon! ☀️';
-        return 'Good evening! 🌆';
-    }, []);
-=======
   const sections = useMemo(
     () =>
       Object.keys(groupedTasks).map(date => ({
@@ -103,7 +67,6 @@ const HomeScreen: React.FC = () => {
     if (hour < 18) return 'Good afternoon! ☀️';
     return 'Good evening! 🌆';
   }, []);
->>>>>>> 0cfe8c62e64026097c89a92fe2e89a9d541ede9f
 
   const renderTaskItem = useCallback(
     ({item}: {item: Task}) => (
@@ -133,32 +96,6 @@ const HomeScreen: React.FC = () => {
     '#7E57C2', // Indigo
   ];
 
-<<<<<<< HEAD
-    return (
-        <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
-            <StatusBar barStyle="dark-content" backgroundColor={theme.backgroundColor} />
-            <Header greeting={getGreeting} onSettingsPress={() => navigation.navigate('SettingsScreen')} />
-            <Text style={[styles.sectionTitle, { color: theme.textColor }]}>Subjects</Text>
-            <SubjectList subjectStyles={subjectStyles} />
-            <ScheduleHeader onViewTasksPress={() => navigation.navigate('TaskListScreen')} />
-            {loading ? (
-                <ActivityIndicator size="large" color={theme.primaryColor} style={styles.loadingIndicator} />
-            ) : error ? (
-                <Text style={[styles.errorText, { color: theme.errorColor }]}>{error}</Text>
-            ) : (
-                <FlatList
-                    data={tasks}
-                    renderItem={renderTaskItem}
-                    keyExtractor={(item) => item.id}
-                    contentContainerStyle={styles.listContent}
-                />
-            )}
-            <TouchableOpacity
-                style={[styles.fab, { backgroundColor: theme.primaryColor }]}
-                onPress={() => navigation.navigate('AddTaskScreen', { id: undefined })}
-            >
-                <Text style={styles.fabIcon}>+</Text>
-=======
   const subjectStyles: {[key: string]: {backgroundColor: string}} = useMemo(
     () => ({
       mathematics: {backgroundColor: colorPalette[0]},
@@ -230,7 +167,6 @@ const HomeScreen: React.FC = () => {
                 ]}>
                 ⋮
               </Text>
->>>>>>> 0cfe8c62e64026097c89a92fe2e89a9d541ede9f
             </TouchableOpacity>
           </TouchableOpacity>
         ))}
@@ -277,48 +213,11 @@ const HomeScreen: React.FC = () => {
   );
 };
 
+
+
+
 const styles = StyleSheet.create({
 <<<<<<< HEAD
-    container: {
-        flex: 1,
-        padding: 20,
-    },
-    sectionTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 10,
-    },
-    listContent: {
-        paddingBottom: 20,
-    },
-    fab: {
-        position: 'absolute',
-        bottom: 30,
-        right: 30,
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        alignItems: 'center',
-        justifyContent: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 3,
-        elevation: 5,
-    },
-    fabIcon: {
-        fontSize: 30,
-        color: '#FFFFFF',
-    },
-    loadingIndicator: {
-        marginTop: 20,
-    },
-    errorText: {
-        textAlign: 'center',
-        fontSize: 16,
-        marginTop: 20,
-    },
-=======
   container: {
     flex: 1,
     padding: 20,
@@ -417,7 +316,6 @@ const styles = StyleSheet.create({
   loadingIndicator: {
     marginTop: 20,
   },
->>>>>>> 0cfe8c62e64026097c89a92fe2e89a9d541ede9f
 });
 
 export default HomeScreen;
